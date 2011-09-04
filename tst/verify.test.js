@@ -5,6 +5,7 @@ var fs = require('fs');
 var http = require('http');
 
 var httpu = require('httpu');
+var test = require('tap').test;
 var uuid = require('node-uuid');
 
 var httpSignature = require('../lib/index');
@@ -62,11 +63,11 @@ function _rfc1123(date) {
 
 ///--- Tests
 
-exports.setUp = function(test, assert) {
+test('setup', function(t) {
   rsaPrivate = fs.readFileSync(__dirname + '/rsa_private.pem', 'ascii');
   rsaPublic = fs.readFileSync(__dirname + '/rsa_public.pem', 'ascii');
-  assert.ok(rsaPrivate);
-  assert.ok(rsaPublic);
+  t.ok(rsaPrivate);
+  t.ok(rsaPublic);
 
   hmacKey = uuid();
   socket = '/tmp/.' + uuid();
@@ -81,21 +82,19 @@ exports.setUp = function(test, assert) {
   });
 
   server.listen(socket, function() {
-    test.finish();
+    t.end();
   });
-};
+});
 
 
-exports.test_invalid_hmac = function(test, assert) {
+test('invalid hmac', function(t) {
   server.tester = function(req, res) {
-    assert.doesNotThrow(function() {
-      var parsed = httpSignature.parseRequest(req);
-      assert.ok(!httpSignature.verify(parsed, hmacKey));
+    var parsed = httpSignature.parseRequest(req);
+    t.ok(!httpSignature.verify(parsed, hmacKey));
 
-      res.writeHead(200);
-      res.write(JSON.stringify(parsed, null, 2));
-      res.end();
-    });
+    res.writeHead(200);
+    res.write(JSON.stringify(parsed, null, 2));
+    res.end();
   };
 
   options.headers.Date = _rfc1123();
@@ -104,22 +103,20 @@ exports.test_invalid_hmac = function(test, assert) {
     uuid();
 
   httpu.get(options, function(res) {
-    assert.equal(res.statusCode, 200);
-    test.finish();
+    t.equal(res.statusCode, 200);
+    t.end();
   });
-};
+});
 
 
-exports.test_valid_hmac = function(test, assert) {
+test('valid hmac', function(t) {
   server.tester = function(req, res) {
-    assert.doesNotThrow(function() {
-      var parsed = httpSignature.parseRequest(req);
-      assert.ok(httpSignature.verify(parsed, hmacKey));
+    var parsed = httpSignature.parseRequest(req);
+    t.ok(httpSignature.verify(parsed, hmacKey));
 
-      res.writeHead(200);
-      res.write(JSON.stringify(parsed, null, 2));
-      res.end();
-    });
+    res.writeHead(200);
+    res.write(JSON.stringify(parsed, null, 2));
+    res.end();
   };
 
   options.headers.Date = _rfc1123();
@@ -130,23 +127,20 @@ exports.test_valid_hmac = function(test, assert) {
     hmac.digest('base64');
 
   httpu.get(options, function(res) {
-    assert.equal(res.statusCode, 200);
-    test.finish();
+    t.equal(res.statusCode, 200);
+    t.end();
   });
-};
+});
 
 
-
-exports.test_invalid_rsa = function(test, assert) {
+test('invalid rsa', function(t) {
   server.tester = function(req, res) {
-    assert.doesNotThrow(function() {
-      var parsed = httpSignature.parseRequest(req);
-      assert.ok(!httpSignature.verify(parsed, rsaPublic));
+    var parsed = httpSignature.parseRequest(req);
+    t.ok(!httpSignature.verify(parsed, rsaPublic));
 
-      res.writeHead(200);
-      res.write(JSON.stringify(parsed, null, 2));
-      res.end();
-    });
+    res.writeHead(200);
+    res.write(JSON.stringify(parsed, null, 2));
+    res.end();
   };
 
   options.headers.Date = _rfc1123();
@@ -155,22 +149,20 @@ exports.test_invalid_rsa = function(test, assert) {
     uuid();
 
   httpu.get(options, function(res) {
-    assert.equal(res.statusCode, 200);
-    test.finish();
+    t.equal(res.statusCode, 200);
+    t.end();
   });
-};
+});
 
 
-exports.test_valid_rsa = function(test, assert) {
+test('valid rsa', function(t) {
   server.tester = function(req, res) {
-    assert.doesNotThrow(function() {
-      var parsed = httpSignature.parseRequest(req);
-      assert.ok(httpSignature.verify(parsed, rsaPublic));
+    var parsed = httpSignature.parseRequest(req);
+    t.ok(httpSignature.verify(parsed, rsaPublic));
 
-      res.writeHead(200);
-      res.write(JSON.stringify(parsed, null, 2));
-      res.end();
-    });
+    res.writeHead(200);
+    res.write(JSON.stringify(parsed, null, 2));
+    res.end();
   };
 
   options.headers.Date = _rfc1123();
@@ -181,15 +173,15 @@ exports.test_valid_rsa = function(test, assert) {
     signer.sign(rsaPrivate, 'base64');
 
   httpu.get(options, function(res) {
-    assert.equal(res.statusCode, 200);
-    test.finish();
+    t.equal(res.statusCode, 200);
+    t.end();
   });
-};
+});
 
 
-exports.tearDown = function(test, assert) {
+test('tear down', function(t) {
   server.on('close', function() {
-    test.finish();
+    t.end();
   });
   server.close();
-};
+});

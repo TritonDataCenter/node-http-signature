@@ -3,6 +3,7 @@
 var http = require('http');
 
 var httpu = require('httpu');
+var test = require('tap').test;
 var uuid = require('node-uuid');
 
 var httpSignature = require('../lib/index');
@@ -57,7 +58,7 @@ function _rfc1123(date) {
 
 ///--- Tests
 
-exports.setUp = function(test, assert) {
+test('setup', function(t) {
   socket = '/tmp/.' + uuid();
   options = {
     socketPath: socket,
@@ -70,38 +71,37 @@ exports.setUp = function(test, assert) {
   });
 
   server.listen(socket, function() {
-    test.finish();
+    t.end();
   });
-};
+});
 
 
-exports.test_no_authorization = function(test, assert) {
+test('no authorization', function(t) {
   server.tester = function(req, res) {
-    assert.throws(
-      function() {
-        httpSignature.parseRequest(req);
-      },
-      TypeError);
-
+    try {
+      httpSignature.parseRequest(req);
+    } catch (e) {
+      t.equal(e.name, 'TypeError');
+    }
     res.writeHead(200);
     res.end();
   };
 
   httpu.get(options, function(res) {
-    assert.equal(res.statusCode, 200);
-    test.finish();
+    t.equal(res.statusCode, 200);
+    t.end();
   });
-};
+});
 
 
-exports.test_bad_scheme = function(test, assert) {
+test('bad scheme', function(t) {
   server.tester = function(req, res) {
-    assert.throws(
-      function() {
-        httpSignature.parseRequest(req);
-      },
-        /InvalidHeaderError: scheme was not "Signature"/
-    );
+    try {
+      httpSignature.parseRequest(req);
+    } catch (e) {
+      t.equal(e.name, 'InvalidHeaderError');
+      t.equal(e.message, 'scheme was not "Signature"');
+    }
 
     res.writeHead(200);
     res.end();
@@ -109,20 +109,20 @@ exports.test_bad_scheme = function(test, assert) {
 
   options.headers.Authorization = 'Basic blahBlahBlah';
   httpu.get(options, function(res) {
-    assert.equal(res.statusCode, 200);
-    test.finish();
+    t.equal(res.statusCode, 200);
+    t.end();
   });
-};
+});
 
 
-exports.test_no_key_id = function(test, assert) {
+test('no key id', function(t) {
   server.tester = function(req, res) {
-    assert.throws(
-      function() {
-        httpSignature.parseRequest(req);
-      },
-        /InvalidHeaderError: keyId was not specified/
-    );
+    try {
+      httpSignature.parseRequest(req);
+    } catch (e) {
+      t.equal(e.name, 'InvalidHeaderError');
+      t.equal(e.message, 'keyId was not specified');
+    }
 
     res.writeHead(200);
     res.end();
@@ -130,20 +130,20 @@ exports.test_no_key_id = function(test, assert) {
 
   options.headers.Authorization = 'Signature foo';
   httpu.get(options, function(res) {
-    assert.equal(res.statusCode, 200);
-    test.finish();
+    t.equal(res.statusCode, 200);
+    t.end();
   });
-};
+});
 
 
-exports.test_key_id_no_value = function(test, assert) {
+test('key id no value', function(t) {
   server.tester = function(req, res) {
-    assert.throws(
-      function() {
-        httpSignature.parseRequest(req);
-      },
-        /InvalidHeaderError: keyId was not specified/
-    );
+    try {
+      httpSignature.parseRequest(req);
+    } catch (e) {
+      t.equal(e.name, 'InvalidHeaderError');
+      t.equal(e.message, 'keyId was not specified');
+    }
 
     res.writeHead(200);
     res.end();
@@ -151,20 +151,20 @@ exports.test_key_id_no_value = function(test, assert) {
 
   options.headers.Authorization = 'Signature keyId=';
   httpu.get(options, function(res) {
-    assert.equal(res.statusCode, 200);
-    test.finish();
+    t.equal(res.statusCode, 200);
+    t.end();
   });
-};
+});
 
 
-exports.test_key_id_no_quotes = function(test, assert) {
+test('key id no quotes', function(t) {
   server.tester = function(req, res) {
-    assert.throws(
-      function() {
-        httpSignature.parseRequest(req);
-      },
-        /InvalidHeaderError: keyId was not specified/
-    );
+    try {
+      httpSignature.parseRequest(req);
+    } catch (e) {
+      t.equal(e.name, 'InvalidHeaderError');
+      t.equal(e.message, 'keyId was not specified');
+    }
 
     res.writeHead(200);
     res.end();
@@ -173,20 +173,20 @@ exports.test_key_id_no_quotes = function(test, assert) {
   options.headers.Authorization =
     'Signature keyId=foo,algorithm=hmac-sha1 aabbcc';
   httpu.get(options, function(res) {
-    assert.equal(res.statusCode, 200);
-    test.finish();
+    t.equal(res.statusCode, 200);
+    t.end();
   });
-};
+});
 
 
-exports.test_no_algorithm = function(test, assert) {
+test('no algorithm', function(t) {
   server.tester = function(req, res) {
-    assert.throws(
-      function() {
-        httpSignature.parseRequest(req);
-      },
-        /InvalidHeaderError: algorithm was not specified/
-    );
+    try {
+      httpSignature.parseRequest(req);
+    } catch (e) {
+      t.equal(e.name, 'InvalidHeaderError');
+      t.equal(e.message, 'algorithm was not specified');
+    }
 
     res.writeHead(200);
     res.end();
@@ -194,20 +194,20 @@ exports.test_no_algorithm = function(test, assert) {
 
   options.headers.Authorization = 'Signature keyId="foo"';
   httpu.get(options, function(res) {
-    assert.equal(res.statusCode, 200);
-    test.finish();
+    t.equal(res.statusCode, 200);
+    t.end();
   });
-};
+});
 
 
-exports.test_algorithm_no_value = function(test, assert) {
+test('algorithm no value', function(t) {
   server.tester = function(req, res) {
-    assert.throws(
-      function() {
-        httpSignature.parseRequest(req);
-      },
-        /InvalidHeaderError: algorithm was not specified/
-    );
+    try {
+      httpSignature.parseRequest(req);
+    } catch (e) {
+      t.equal(e.name, 'InvalidHeaderError');
+      t.equal(e.message, 'algorithm was not specified');
+    }
 
     res.writeHead(200);
     res.end();
@@ -215,20 +215,20 @@ exports.test_algorithm_no_value = function(test, assert) {
 
   options.headers.Authorization = 'Signature keyId="foo",algorithm=';
   httpu.get(options, function(res) {
-    assert.equal(res.statusCode, 200);
-    test.finish();
+    t.equal(res.statusCode, 200);
+    t.end();
   });
-};
+});
 
 
-exports.test_no_signature = function(test, assert) {
+test('no signature', function(t) {
   server.tester = function(req, res) {
-    assert.throws(
-      function() {
-        httpSignature.parseRequest(req);
-      },
-        /InvalidHeaderError: signature was empty/
-    );
+    try {
+      httpSignature.parseRequest(req);
+    } catch (e) {
+      t.equal(e.name, 'InvalidHeaderError');
+      t.equal(e.message, 'signature was empty');
+    }
 
     res.writeHead(200);
     res.end();
@@ -236,20 +236,20 @@ exports.test_no_signature = function(test, assert) {
 
   options.headers.Authorization = 'Signature keyId="foo",algorithm="foo"';
   httpu.get(options, function(res) {
-    assert.equal(res.statusCode, 200);
-    test.finish();
+    t.equal(res.statusCode, 200);
+    t.end();
   });
-};
+});
 
 
-exports.test_invalid_algorithm = function(test, assert) {
+test('invalid algorithm', function(t) {
   server.tester = function(req, res) {
-    assert.throws(
-      function() {
-        httpSignature.parseRequest(req);
-      },
-        /InvalidParamsError: foo is not supported/
-    );
+    try {
+      httpSignature.parseRequest(req);
+    } catch (e) {
+      t.equal(e.name, 'InvalidParamsError');
+      t.equal(e.message, 'foo is not supported');
+    }
 
     res.writeHead(200);
     res.end();
@@ -258,20 +258,20 @@ exports.test_invalid_algorithm = function(test, assert) {
   options.headers.Authorization =
     'Signature keyId="foo",algorithm="foo" aaabbbbcccc';
   httpu.get(options, function(res) {
-    assert.equal(res.statusCode, 200);
-    test.finish();
+    t.equal(res.statusCode, 200);
+    t.end();
   });
-};
+});
 
 
-exports.test_no_date_header = function(test, assert) {
+test('no date header', function(t) {
   server.tester = function(req, res) {
-    assert.throws(
-      function() {
-        httpSignature.parseRequest(req);
-      },
-        /MissingHeaderError: date was not in the request/
-    );
+    try {
+      httpSignature.parseRequest(req);
+    } catch (e) {
+      t.equal(e.name, 'MissingHeaderError');
+      t.equal(e.message, 'date was not in the request');
+    }
 
     res.writeHead(200);
     res.end();
@@ -280,17 +280,19 @@ exports.test_no_date_header = function(test, assert) {
   options.headers.Authorization =
     'Signature keyId="foo",algorithm="rsa-sha256" aaabbbbcccc';
   httpu.get(options, function(res) {
-    assert.equal(res.statusCode, 200);
-    test.finish();
+    t.equal(res.statusCode, 200);
+    t.end();
   });
-};
+});
 
 
-exports.test_valid_default_headers = function(test, assert) {
+test('valid default headers', function(t) {
   server.tester = function(req, res) {
-    assert.doesNotThrow(function() {
+    try {
       httpSignature.parseRequest(req);
-    });
+    } catch (e) {
+      t.fail(e.stack);
+    }
 
     res.writeHead(200);
     res.end();
@@ -300,20 +302,20 @@ exports.test_valid_default_headers = function(test, assert) {
     'Signature keyId="foo",algorithm="rsa-sha256" aaabbbbcccc';
   options.headers.Date = _rfc1123();
   httpu.get(options, function(res) {
-    assert.equal(res.statusCode, 200);
-    test.finish();
+    t.equal(res.statusCode, 200);
+    t.end();
   });
-};
+});
 
 
-exports.test_explicit_headers_missing = function(test, assert) {
+test('explicit headers missing', function(t) {
   server.tester = function(req, res) {
-    assert.throws(
-      function() {
-        httpSignature.parseRequest(req);
-      },
-        /MissingHeaderError: content-md5 was not in the request/
-    );
+    try {
+      httpSignature.parseRequest(req);
+    } catch (e) {
+      t.equal(e.name, 'MissingHeaderError');
+      t.equal(e.message, 'content-md5 was not in the request');
+    }
 
     res.writeHead(200);
     res.end();
@@ -324,20 +326,18 @@ exports.test_explicit_headers_missing = function(test, assert) {
     'headers="date content-md5" aaabbbbcccc';
   options.headers.Date = _rfc1123();
   httpu.get(options, function(res) {
-    assert.equal(res.statusCode, 200);
-    test.finish();
+    t.equal(res.statusCode, 200);
+    t.end();
   });
-};
+});
 
 
-exports.test_valid_explicit_headers = function(test, assert) {
+test('valid explicit headers', function(t) {
   server.tester = function(req, res) {
-    assert.doesNotThrow(function() {
-      var parsed = httpSignature.parseRequest(req);
-      res.writeHead(200);
-      res.write(JSON.stringify(parsed, null, 2));
-      res.end();
-    });
+    var parsed = httpSignature.parseRequest(req);
+    res.writeHead(200);
+    res.write(JSON.stringify(parsed, null, 2));
+    res.end();
   };
 
 
@@ -347,8 +347,9 @@ exports.test_valid_explicit_headers = function(test, assert) {
     'extensions="blah blah" digitalSignature';
   options.headers.Date = _rfc1123();
   options.headers['content-md5'] = uuid();
+
   httpu.get(options, function(res) {
-    assert.equal(res.statusCode, 200);
+    t.equal(res.statusCode, 200);
 
     var body = '';
     res.setEncoding('utf8');
@@ -359,33 +360,33 @@ exports.test_valid_explicit_headers = function(test, assert) {
     res.on('end', function() {
       console.log(body);
       var parsed = JSON.parse(body);
-      assert.ok(parsed);
-      assert.equal(parsed.scheme, 'Signature');
-      assert.ok(parsed.params);
-      assert.equal(parsed.params.keyId, 'fo,o');
-      assert.equal(parsed.params.algorithm, 'rsa-sha256');
-      assert.equal(parsed.params.extensions, 'blah blah');
-      assert.ok(parsed.params.headers);
-      assert.equal(parsed.params.headers.length, 3);
-      assert.equal(parsed.params.headers[0], 'date');
-      assert.equal(parsed.params.headers[1], 'content-md5');
-      assert.equal(parsed.params.headers[2], 'request-line');
-      assert.equal(parsed.signature, 'digitalSignature');
-      assert.ok(parsed.signingString);
-      assert.equal(parsed.signingString,
+      t.ok(parsed);
+      t.equal(parsed.scheme, 'Signature');
+      t.ok(parsed.params);
+      t.equal(parsed.params.keyId, 'fo,o');
+      t.equal(parsed.params.algorithm, 'rsa-sha256');
+      t.equal(parsed.params.extensions, 'blah blah');
+      t.ok(parsed.params.headers);
+      t.equal(parsed.params.headers.length, 3);
+      t.equal(parsed.params.headers[0], 'date');
+      t.equal(parsed.params.headers[1], 'content-md5');
+      t.equal(parsed.params.headers[2], 'request-line');
+      t.equal(parsed.signature, 'digitalSignature');
+      t.ok(parsed.signingString);
+      t.equal(parsed.signingString,
                    (options.headers.Date + '\n' +
                     options.headers['content-md5'] + '\n' +
                     'GET / HTTP/1.1'));
-      assert.equal(parsed.params.keyId, parsed.keyId);
-      assert.equal(parsed.params.algorithm.toUpperCase(),
-                   parsed.algorithm);
-      test.finish();
+      t.equal(parsed.params.keyId, parsed.keyId);
+      t.equal(parsed.params.algorithm.toUpperCase(),
+              parsed.algorithm);
+      t.end();
     });
   });
-};
+});
 
 
-exports.test_expired = function(test, assert) {
+test('expired', function(t) {
   server.tester = function(req, res) {
     var options = {
       clockSkew: 1,
@@ -393,12 +394,12 @@ exports.test_expired = function(test, assert) {
     };
 
     setTimeout(function() {
-      assert.throws(
-        function() {
-          httpSignature.parseRequest(req, options);
-        },
-          /ExpiredRequestError: clock skew of \d\.\d+s was greater than 1s/
-      );
+      try {
+        httpSignature.parseRequest(req);
+      } catch (e) {
+        t.equal(e.name, 'ExpiredRequestError');
+        t.ok(/clock skew of \d\.\d+s was greater than 1s/.test(e.message));
+      }
 
       res.writeHead(200);
       res.end();
@@ -411,25 +412,25 @@ exports.test_expired = function(test, assert) {
   options.headers.Date = _rfc1123();
   options.headers['content-md5'] = uuid();
   httpu.get(options, function(res) {
-    assert.equal(res.statusCode, 200);
-    test.finish();
+    t.equal(res.statusCode, 200);
+    t.end();
   });
-};
+});
 
 
-exports.test_missing_required_header = function(test, assert) {
+test('missing required header', function(t) {
   server.tester = function(req, res) {
     var options = {
       clockSkew: 1,
       headers: ['date', 'x-unit-test']
     };
 
-    assert.throws(
-      function() {
-        httpSignature.parseRequest(req, options);
-      },
-        /MissingHeaderError: x-unit-test was not a signed header/
-    );
+    try {
+      httpSignature.parseRequest(req, options);
+    } catch (e) {
+      t.equal('MissingHeaderError', e.name);
+      t.equal('x-unit-test was not a signed header', e.message);
+    }
 
     res.writeHead(200);
     res.end();
@@ -441,25 +442,25 @@ exports.test_missing_required_header = function(test, assert) {
   options.headers.Date = _rfc1123();
   options.headers['content-md5'] = uuid();
   httpu.get(options, function(res) {
-    assert.equal(res.statusCode, 200);
-    test.finish();
+    t.equal(res.statusCode, 200);
+    t.end();
   });
-};
+});
 
 
-exports.test_not_whitelist_algorithm = function(test, assert) {
+test('not whitelisted algorithm', function(t) {
   server.tester = function(req, res) {
     var options = {
       clockSkew: 1,
       algorithms: ['rsa-sha1']
     };
 
-    assert.throws(
-      function() {
-        httpSignature.parseRequest(req, options);
-      },
-        /InvalidParamsError: rsa-sha256 is not a supported algorithm/
-    );
+    try {
+      httpSignature.parseRequest(req, options);
+    } catch (e) {
+      t.equal('InvalidParamsError', e.name);
+      t.equal('rsa-sha256 is not a supported algorithm', e.message);
+    }
 
     res.writeHead(200);
     res.end();
@@ -471,15 +472,15 @@ exports.test_not_whitelist_algorithm = function(test, assert) {
   options.headers.Date = _rfc1123();
   options.headers['content-md5'] = uuid();
   httpu.get(options, function(res) {
-    assert.equal(res.statusCode, 200);
-    test.finish();
+    t.equal(res.statusCode, 200);
+    t.end();
   });
-};
+});
 
 
-exports.tearDown = function(test, assert) {
+test('tearDown', function(t) {
   server.on('close', function() {
-    test.finish();
+    t.end();
   });
   server.close();
-};
+});

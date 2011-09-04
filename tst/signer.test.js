@@ -5,6 +5,7 @@ var fs = require('fs');
 var http = require('http');
 
 var httpu = require('httpu');
+var test = require('tap').test;
 var uuid = require('node-uuid');
 
 var httpSignature = require('../lib/index');
@@ -17,71 +18,92 @@ var hmacKey = null;
 var httpOptions = null;
 var rsaPrivate = null;
 var signOptions = null;
+var server = null;
+var socket = null;
 
 
 
 ///--- Tests
 
-exports.setUp = function(test, assert) {
+
+test('setup', function(t) {
   rsaPrivate = fs.readFileSync(__dirname + '/rsa_private.pem', 'ascii');
-  assert.ok(rsaPrivate);
+  t.ok(rsaPrivate);
 
-  hmacKey = uuid();
-  httpOptions = {
-    socketPath: uuid(),
-    path: '/',
-    method: 'GET',
-    headers: {}
-  };
+  socket = '/tmp/.' + uuid();
 
-  signOptions = {
-    key: rsaPrivate,
-    keyId: 'unitTest'
-  };
+  server = http.createServer(function(req, res) {
+    res.writeHead(200);
+    res.end();
+  });
 
-  test.finish();
-};
+  server.listen(socket, function() {
+    hmacKey = uuid();
+    httpOptions = {
+      socketPath: socket,
+      path: '/',
+      method: 'GET',
+      headers: {}
+    };
+
+    signOptions = {
+      key: rsaPrivate,
+      keyId: 'unitTest'
+    };
+
+    t.end();
+  });
+});
 
 
-exports.test_defaults = function(test, assert) {
-  var req = httpu.request(httpOptions, function(res) {});
-  assert.ok(httpSignature.sign(req, signOptions));
-  assert.ok(req.getHeader('Authorization'));
+test('defaults', function(t) {
+  var req = httpu.request(httpOptions, function(res) {
+    t.end();
+  });
+  t.ok(httpSignature.sign(req, signOptions));
+  t.ok(req.getHeader('Authorization'));
   console.log('> ' + req.getHeader('Authorization'));
-  test.finish();
-};
+  req.end();
+});
 
 
-exports.test_request_line = function(test, assert) {
-  var req = httpu.request(httpOptions, function(res) {});
+test('request line', function(t) {
+  var req = httpu.request(httpOptions, function(res) {
+    t.end();
+  });
   var opts = {
     keyId: 'unit',
     key: rsaPrivate,
     headers: ['date', 'request-line']
   };
 
-  assert.ok(httpSignature.sign(req, opts));
-  assert.ok(req.getHeader('Authorization'));
+  t.ok(httpSignature.sign(req, opts));
+  t.ok(req.getHeader('Authorization'));
   console.log('> ' + req.getHeader('Authorization'));
-  test.finish();
-};
+  req.end();
+});
 
 
-exports.test_hmac = function(test, assert) {
-  var req = httpu.request(httpOptions, function(res) {});
+test('hmac', function(t) {
+  var req = httpu.request(httpOptions, function(res) {
+    t.end();
+  });
   var opts = {
     keyId: 'unit',
     key: uuid(),
     algorithm: 'hmac-sha1'
   };
 
-  assert.ok(httpSignature.sign(req, opts));
-  assert.ok(req.getHeader('Authorization'));
+  t.ok(httpSignature.sign(req, opts));
+  t.ok(req.getHeader('Authorization'));
   console.log('> ' + req.getHeader('Authorization'));
-  test.finish();
-};
+  req.end();
+});
 
 
-exports.tearDown = function(test, assert) {
-  test.finish();
-};
+test('tear down', function(t) {
+  server.on('close', function() {
+    t.end();
+  });
+  server.close();
+});

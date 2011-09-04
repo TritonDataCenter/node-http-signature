@@ -1,6 +1,6 @@
 // Copyright 2011 Joyent, Inc.  All rights reserved.
 
-var fs = require('fs');
+var test = require('tap').test;
 
 var sshKeyToPEM = require('../lib/index').sshKeyToPEM;
 
@@ -64,22 +64,19 @@ var PEM_4096 = '-----BEGIN PUBLIC KEY-----\n' +
 
 ///--- Tests
 
-exports.test_1024b = function(test, assert) {
-  var pem = sshKeyToPEM(SSH_1024);
-  assert.equal(pem, PEM_1024);
-  test.finish();
-};
+test('1024b rsa ssh key', function(t) {
+  t.equal(sshKeyToPEM(SSH_1024), PEM_1024);
+  t.end();
+});
 
 
-exports.test_2048b = function(test, assert) {
-  var pem = sshKeyToPEM(SSH_2048);
-  assert.equal(pem, PEM_2048);
-  test.finish();
-};
+test('2048b rsa ssh key', function(t) {
+  t.equal(sshKeyToPEM(SSH_2048), PEM_2048);
+  t.end();
+});
 
 
-exports.test_4096b = function(test, assert) {
-  var pem = sshKeyToPEM(SSH_4096);
-  assert.equal(pem, PEM_4096);
-  test.finish();
-};
+test('4096b rsa ssh key', function(t) {
+  t.equal(sshKeyToPEM(SSH_4096), PEM_4096);
+  t.end();
+});

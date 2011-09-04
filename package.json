@@ -2,19 +2,19 @@
   "author": "Joyent, Inc",
   "name": "http-signature",
   "description": "Reference implementation of Joyent's HTTP Signature Scheme",
-  "version": "0.9.1",
+  "version": "0.9.2",
   "homepage": "http://www.joyent.com",
   "repository": {
     "type": "git",
     "url": "git://github.com/joyent/node-http-signature.git"
   },
   "engines": {
-    "node": "~0.4.9"
+    "node": ">=0.4.9"
   },
   "main": "lib/index.js",
   "scripts": {
     "pretest": "which gjslint; if [[ \"$?\" = 0 ]] ; then  gjslint --nojsdoc -r . -e node_modules; else echo \"Missing gjslint. Skipping lint\"; fi",
-    "test": "./node_modules/.bin/whiskey --quiet --sequential --timeout 2500 -t \"`find tst -name *.test.js | xargs`\""
+    "test": "./node_modules/.bin/tap tst/*.js"
   },
   "dependencies": {
     "asn1": "0.1.5",
@@ -22,8 +22,8 @@
     "sprintf": "0.1.1"
   },
   "devDependencies": {
-    "httpu": "0.0.1",
+    "httpu": "1.0.0",
     "node-uuid": "1.2.0",
-    "whiskey": "0.4.0"
+    "tap": "0.0.9"
   }
 }
