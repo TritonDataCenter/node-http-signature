@@ -2,6 +2,7 @@
 
 var test = require('tap').test;
 
+var sshKeyFingerprint = require('../lib/index').sshKeyFingerprint;
 var sshKeyToPEM = require('../lib/index').sshKeyToPEM;
 
 
@@ -78,5 +79,12 @@ test('2048b rsa ssh key', function(t) {
 
 test('4096b rsa ssh key', function(t) {
   t.equal(sshKeyToPEM(SSH_4096), PEM_4096);
+  t.end();
+});
+
+
+test('fingerprint', function(t) {
+  var fp = sshKeyFingerprint(SSH_1024);
+  t.equal(fp, '59:a4:61:0e:38:18:9f:0f:28:58:2a:27:f7:65:c5:87');
   t.end();
 });
