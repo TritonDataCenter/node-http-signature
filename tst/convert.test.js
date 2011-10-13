@@ -61,7 +61,27 @@ var PEM_4096 = '-----BEGIN PUBLIC KEY-----\n' +
   'gVEBd4mwFJLl/DT2Nlbj9q0CASM=\n' +
   '-----END PUBLIC KEY-----\n';
 
-
+var DSA_1024 = 'ssh-dss AAAAB3NzaC1kc3MAAACBAKK5sckoM05sOPajUcTWG0zPTvyRmj6' +
+  'YQ1g2IgezUUrXgY+2PPy07+JrQi8SN9qr/CBP+0q0Ec48qVFf9LlkUBwu9Jf5HTUVNiKNj3c' +
+  'SRPFH8HqZn+nxhVsOLhnHWxgDQ8OOm48Ma61NcYVo2B0Ne8cUs8xSqLqba2EG9ze87FQZAAA' +
+  'AFQCVP/xpiAofZRD8L4QFwxOW9krikQAAAIACNv0EmKr+nIA13fjhpiqbYYyVXYOiWM4cmOD' +
+  'G/d1J8/vR4YhWHWPbAEw7LD0DEwDIHLlRZr/1jsHbFcwt4tzRs95fyHzpucpGhocmjWx43qt' +
+  'xEhDeJrxPlkIXHakciAEhoo+5YeRSSgRse5PrZDosdr5fA+DADs8tnto5Glf5owAAAIBHcEF' +
+  '5ytvCRiKbsWKOgeMZ7JT/XGX+hMhS7aaJ2IspKj7YsWada1yBwoM6yYHtlpnGsq/PoPaZU8K' +
+  '40f47psV6OhSh+/O/jgqLS/Ur2c0mQQqIb7vvkc7he/SPOQAqyDmyYFBuazuSf2s9Uy2hfvj' +
+  'Wgb6X+vN9W8SOb2668IL7Vg== mark@bluesnoop.local';
+var DSA_1024_PEM = '-----BEGIN PUBLIC KEY-----\n' +
+  'MIIBtjCCASsGByqGSM44BAEwggEeAoGBAKK5sckoM05sOPajUcTWG0zPTvyRmj6Y\n' +
+  'Q1g2IgezUUrXgY+2PPy07+JrQi8SN9qr/CBP+0q0Ec48qVFf9LlkUBwu9Jf5HTUV\n' +
+  'NiKNj3cSRPFH8HqZn+nxhVsOLhnHWxgDQ8OOm48Ma61NcYVo2B0Ne8cUs8xSqLqb\n' +
+  'a2EG9ze87FQZAhUAlT/8aYgKH2UQ/C+EBcMTlvZK4pECgYACNv0EmKr+nIA13fjh\n' +
+  'piqbYYyVXYOiWM4cmODG/d1J8/vR4YhWHWPbAEw7LD0DEwDIHLlRZr/1jsHbFcwt\n' +
+  '4tzRs95fyHzpucpGhocmjWx43qtxEhDeJrxPlkIXHakciAEhoo+5YeRSSgRse5Pr\n' +
+  'ZDosdr5fA+DADs8tnto5Glf5owOBhAACgYBHcEF5ytvCRiKbsWKOgeMZ7JT/XGX+\n' +
+  'hMhS7aaJ2IspKj7YsWada1yBwoM6yYHtlpnGsq/PoPaZU8K40f47psV6OhSh+/O/\n' +
+  'jgqLS/Ur2c0mQQqIb7vvkc7he/SPOQAqyDmyYFBuazuSf2s9Uy2hfvjWgb6X+vN9\n' +
+  'W8SOb2668IL7Vg==\n' +
+  '-----END PUBLIC KEY-----\n';
 
 ///--- Tests
 
@@ -83,8 +103,15 @@ test('4096b rsa ssh key', function(t) {
 });
 
 
+test('1024b dsa ssh key', function(t) {
+  t.equal(sshKeyToPEM(DSA_1024), DSA_1024_PEM);
+  t.end();
+});
+
 test('fingerprint', function(t) {
   var fp = sshKeyFingerprint(SSH_1024);
   t.equal(fp, '59:a4:61:0e:38:18:9f:0f:28:58:2a:27:f7:65:c5:87');
   t.end();
 });
+
+
