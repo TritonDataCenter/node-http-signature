@@ -2,7 +2,7 @@
   "author": "Joyent, Inc",
   "name": "http-signature",
   "description": "Reference implementation of Joyent's HTTP Signature Scheme",
-  "version": "0.9.5",
+  "version": "0.9.6",
   "homepage": "http://www.joyent.com",
   "repository": {
     "type": "git",
@@ -17,13 +17,13 @@
     "test": "./node_modules/.bin/tap tst/*.js"
   },
   "dependencies": {
-    "asn1": "0.1.7",
-    "ctype": "0.1.0",
+    "asn1": "0.1.9",
+    "ctype": "0.3.1",
     "sprintf": "0.1.1"
   },
   "devDependencies": {
     "httpu": "1.0.0",
     "node-uuid": "1.2.0",
-    "tap": "0.0.9"
+    "tap": "0.0.14"
   }
 }
