@@ -2,7 +2,7 @@
   "author": "Joyent, Inc",
   "name": "http-signature",
   "description": "Reference implementation of Joyent's HTTP Signature Scheme",
-  "version": "0.9.6",
+  "version": "0.9.7",
   "homepage": "http://www.joyent.com",
   "repository": {
     "type": "git",
