@@ -84,7 +84,7 @@ include the HTTP request line in the signature calculation, use the special
 `request-line` value.  While this is overloading the definition of `headers` in
 HTTP linguism, the request-line is defined in RFC 2616, and as the outlier from
 headers in useful signature calculation, it is deemed simpler to simply use
-`request-line` then to add a separate parameter for it.
+`request-line` than to add a separate parameter for it.
 
 #### extensions
 
@@ -105,7 +105,7 @@ to `algorithm`.  The result is then `Base64` encoded.
 In order to generate the string that is signed with a key, the client MUST
 take the values of each HTTP header specified by `headers`, in the order they
 appear, and separate with an ASCII newline `\n`.  The last header in the list
-MUST include a trailing ASCII newline.
+MUST NOT include a trailing ASCII newline.
 
 # Example Requests
 
@@ -126,10 +126,11 @@ All requests refer to the following request (body ommitted):
 
     Authorization: Signature keyId="123",headers="content-type Date content-md5" Base64(RSA-SHA256(Tue, 07 Jun 2011 20:51:35 GMT))
 
-The client would compose the signing string as:
+The client would compose the signing string as (`+ "\n"` inserted for
+readability):
 
-    application/json
-    Tue, 07 Jun 2011 20:51:35 GMT
+    application/json + "\n"
+    Tue, 07 Jun 2011 20:51:35 GMT + "\n"
     h0auK8hnYJKmHTLhKtMTkQ==
 
 ## Algorithm
@@ -200,3 +201,73 @@ will want to enforce, but service providers SHOULD at minimum include the
     Company: Joyent, Inc.
     Email: mark.cavage@joyent.com
     URI: http://www.joyent.com
+
+# Appendix A - Test Values
+
+The following test data uses the RSA (2048b) keys, which we will refer
+to as `keyId=Test` in the following samples:
+
+   -----BEGIN PUBLIC KEY-----
+   MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDCFENGw33yGihy92pDjZQhl0C3
+   6rPJj+CvfSC8+q28hxA161QFNUd13wuCTUcq0Qd2qsBe/2hFyc2DCJJg0h1L78+6
+   Z4UMR7EOcpfdUE9Hf3m/hs+FUR45uBJeDK1HSFHD8bHKD6kv8FPGfJTotc+2xjJw
+   oYi+1hqp1fIekaxsyQIDAQAB
+   -----END PUBLIC KEY-----
+
+    -----BEGIN RSA PRIVATE KEY-----
+    MIICXgIBAAKBgQDCFENGw33yGihy92pDjZQhl0C36rPJj+CvfSC8+q28hxA161QF
+    NUd13wuCTUcq0Qd2qsBe/2hFyc2DCJJg0h1L78+6Z4UMR7EOcpfdUE9Hf3m/hs+F
+    UR45uBJeDK1HSFHD8bHKD6kv8FPGfJTotc+2xjJwoYi+1hqp1fIekaxsyQIDAQAB
+    AoGBAJR8ZkCUvx5kzv+utdl7T5MnordT1TvoXXJGXK7ZZ+UuvMNUCdN2QPc4sBiA
+    QWvLw1cSKt5DsKZ8UETpYPy8pPYnnDEz2dDYiaew9+xEpubyeW2oH4Zx71wqBtOK
+    kqwrXa/pzdpiucRRjk6vE6YY7EBBs/g7uanVpGibOVAEsqH1AkEA7DkjVH28WDUg
+    f1nqvfn2Kj6CT7nIcE3jGJsZZ7zlZmBmHFDONMLUrXR/Zm3pR5m0tCmBqa5RK95u
+    412jt1dPIwJBANJT3v8pnkth48bQo/fKel6uEYyboRtA5/uHuHkZ6FQF7OUkGogc
+    mSJluOdc5t6hI1VsLn0QZEjQZMEOWr+wKSMCQQCC4kXJEsHAve77oP6HtG/IiEn7
+    kpyUXRNvFsDE0czpJJBvL/aRFUJxuRK91jhjC68sA7NsKMGg5OXb5I5Jj36xAkEA
+    gIT7aFOYBFwGgQAQkWNKLvySgKbAZRTeLBacpHMuQdl1DfdntvAyqpAZ0lY0RKmW
+    G6aFKaqQfOXKCyWoUiVknQJAXrlgySFci/2ueKlIE1QqIiLSZ8V8OlpFLRnb1pzI
+    7U1yQXnTAEFYM560yJlzUpOb1V4cScGd365tiSMvxLOvTA==
+    -----END RSA PRIVATE KEY-----
+
+And all examples use this request:
+
+    POST /foo?param=value&pet=dog HTTP/1.1
+    Host: example.com
+    Date: Thu, 05 Jan 2012 21:31:40 GMT
+    Content-Type: application/json
+    Content-MD5: Sd/dVLAcvNLSq16eXua5uQ==
+    Content-Length: 18
+
+    {"hello": "world"}
+
+### Default
+
+The string to sign would be:
+
+```
+Thu, 05 Jan 2012 21:31:40 GMT
+```
+
+The Authorization header would be:
+
+    Authorization: Signature keyId="Test",algorithm="rsa-sha256" MDyO5tSvin5FBVdq3gMBTwtVgE8U/JpzSwFvY7gu7Q2tiZ5TvfHzf/RzmRoYwO8PoV1UGaw6IMwWzxDQkcoYOwvG/w4ljQBBoNusO/mYSvKrbqxUmZi8rNtrMcb82MS33bai5IeLnOGl31W1UbL4qE/wL8U9wCPGRJlCFLsTgD8=
+
+### All Headers
+
+Parameterized to include all headers, the string to sign would be:
+
+```
+/foo?param=value&pet=dog HTTP/1.1
+example.com
+Thu, 05 Jan 2012 21:31:40 GMT
+application/json
+Sd/dVLAcvNLSq16eXua5uQ==
+18
+```
+
+The Authorization header would be:
+
+    Authorization: Signature
+    keyId="Test",algorithm="rsa-sha256",headers="request-line host date content-type content-md5 content-length" gVrKP7wVh1+FmWbNlhj0pNXIe9XmeOA6EcnoOKAvUILnwaMFzaKaam9UmeDPwjC9TdT+jSRqjtyZE49kZcSpYAHxGlPQ4ziXFRfPprlN/3Xwg3sUOGqbBiS3WFuY3QOOWv4tzc5p70g74U/QvHNNiYMcjoz89vRJhefbFSNwCDs=
+
