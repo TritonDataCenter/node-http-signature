@@ -81,7 +81,7 @@ test('no authorization', function(t) {
     try {
       httpSignature.parseRequest(req);
     } catch (e) {
-      t.equal(e.name, 'TypeError');
+      t.equal(e.name, 'MissingHeaderError');
     }
     res.writeHead(200);
     res.end();
