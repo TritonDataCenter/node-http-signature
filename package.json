@@ -3,7 +3,6 @@
   "name": "http-signature",
   "description": "Reference implementation of Joyent's HTTP Signature Scheme",
   "version": "0.9.8",
-  "homepage": "http://www.joyent.com",
   "repository": {
     "type": "git",
     "url": "git://github.com/joyent/node-http-signature.git"
