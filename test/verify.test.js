@@ -4,7 +4,6 @@ var crypto = require('crypto');
 var fs = require('fs');
 var http = require('http');
 
-var httpu = require('httpu');
 var test = require('tap').test;
 var uuid = require('node-uuid');
 
@@ -102,7 +101,7 @@ test('invalid hmac', function(t) {
     'Signature keyId="foo",algorithm="hmac-sha1" ' +
     uuid();
 
-  httpu.get(options, function(res) {
+  http.get(options, function(res) {
     t.equal(res.statusCode, 200);
     t.end();
   });
@@ -126,7 +125,7 @@ test('valid hmac', function(t) {
     'Signature keyId="foo",algorithm="hmac-sha1" ' +
     hmac.digest('base64');
 
-  httpu.get(options, function(res) {
+  http.get(options, function(res) {
     t.equal(res.statusCode, 200);
     t.end();
   });
@@ -148,7 +147,7 @@ test('invalid rsa', function(t) {
     'Signature keyId="foo",algorithm="rsa-sha1" ' +
     uuid();
 
-  httpu.get(options, function(res) {
+  http.get(options, function(res) {
     t.equal(res.statusCode, 200);
     t.end();
   });
@@ -172,7 +171,7 @@ test('valid rsa', function(t) {
     'Signature keyId="foo",algorithm="rsa-sha256" ' +
     signer.sign(rsaPrivate, 'base64');
 
-  httpu.get(options, function(res) {
+  http.get(options, function(res) {
     t.equal(res.statusCode, 200);
     t.end();
   });

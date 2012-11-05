@@ -4,7 +4,6 @@ var crypto = require('crypto');
 var fs = require('fs');
 var http = require('http');
 
-var httpu = require('httpu');
 var test = require('tap').test;
 var uuid = require('node-uuid');
 
@@ -57,7 +56,7 @@ test('setup', function(t) {
 
 
 test('defaults', function(t) {
-  var req = httpu.request(httpOptions, function(res) {
+  var req = http.request(httpOptions, function(res) {
     t.end();
   });
   t.ok(httpSignature.sign(req, signOptions));
@@ -68,7 +67,7 @@ test('defaults', function(t) {
 
 
 test('request line', function(t) {
-  var req = httpu.request(httpOptions, function(res) {
+  var req = http.request(httpOptions, function(res) {
     t.end();
   });
   var opts = {
@@ -85,7 +84,7 @@ test('request line', function(t) {
 
 
 test('hmac', function(t) {
-  var req = httpu.request(httpOptions, function(res) {
+  var req = http.request(httpOptions, function(res) {
     t.end();
   });
   var opts = {
