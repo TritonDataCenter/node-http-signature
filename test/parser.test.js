@@ -373,8 +373,8 @@ test('valid explicit headers', function(t) {
       t.equal(parsed.signature, 'digitalSignature');
       t.ok(parsed.signingString);
       t.equal(parsed.signingString,
-                   (options.headers.Date + '\n' +
-                    options.headers['content-md5'] + '\n' +
+                   ('date: ' + options.headers.Date + '\n' +
+                    'content-md5: ' + options.headers['content-md5'] + '\n' +
                     'GET / HTTP/1.1'));
       t.equal(parsed.params.keyId, parsed.keyId);
       t.equal(parsed.params.algorithm.toUpperCase(),

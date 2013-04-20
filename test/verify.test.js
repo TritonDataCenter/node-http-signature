@@ -120,7 +120,7 @@ test('valid hmac', function(t) {
 
   options.headers.Date = _rfc1123();
   var hmac = crypto.createHmac('sha1', hmacKey);
-  hmac.update(options.headers.Date);
+  hmac.update('date: ' + options.headers.Date);
   options.headers.Authorization =
     'Signature keyId="foo",algorithm="hmac-sha1" ' +
     hmac.digest('base64');
@@ -166,7 +166,7 @@ test('valid rsa', function(t) {
 
   options.headers.Date = _rfc1123();
   var signer = crypto.createSign('RSA-SHA256');
-  signer.update(options.headers.Date);
+  signer.update('date: ' + options.headers.Date);
   options.headers.Authorization =
     'Signature keyId="foo",algorithm="rsa-sha256" ' +
     signer.sign(rsaPrivate, 'base64');
@@ -175,6 +175,79 @@ test('valid rsa', function(t) {
     t.equal(res.statusCode, 200);
     t.end();
   });
+});
+
+
+// test values from spec for defaults
+test('valid rsa from spec default', function(t) {
+  server.tester = function(req, res) {
+    console.log('> [DEFAULT]', req.headers.authorization);
+    var parsed = httpSignature.parseRequest(req);
+    t.ok(httpSignature.verify(parsed, rsaPublic));
+
+    res.writeHead(200);
+    res.write(JSON.stringify(parsed, null, 2));
+    res.end();
+  };
+
+  options.method = 'POST';
+  options.path = '/foo?param=value&pet=dog';
+  options.headers.host = 'example.com';
+  options.headers.Date = _rfc1123();
+  options.headers['content-type'] = 'application/json';
+  options.headers['content-md5'] = 'Sd/dVLAcvNLSq16eXua5uQ==';
+  options.headers['content-length'] = '18';
+  var signer = crypto.createSign('RSA-SHA256');
+  signer.update('date: ' + options.headers.Date);
+  options.headers.Authorization =
+    'Signature keyId="Test",algorithm="rsa-sha256"' +
+    ' ' + signer.sign(rsaPrivate, 'base64');
+
+  var req = http.request(options, function(res) {
+    t.equal(res.statusCode, 200);
+    t.end();
+  });
+  req.write('{"hello": "world"}');
+  req.end();
+});
+
+// test values from spec for all headers
+test('valid rsa from spec all headers', function(t) {
+  server.tester = function(req, res) {
+    console.log('> [ALL]', req.headers.authorization);
+    var parsed = httpSignature.parseRequest(req);
+    t.ok(httpSignature.verify(parsed, rsaPublic));
+
+    res.writeHead(200);
+    res.write(JSON.stringify(parsed, null, 2));
+    res.end();
+  };
+
+  options.method = 'POST';
+  options.path = '/foo?param=value&pet=dog';
+  options.headers.host = 'example.com';
+  options.headers.Date = _rfc1123();
+  options.headers['content-type'] = 'application/json';
+  options.headers['content-md5'] = 'Sd/dVLAcvNLSq16eXua5uQ==';
+  options.headers['content-length'] = '18';
+  var signer = crypto.createSign('RSA-SHA256');
+  signer.update(options.method + ' ' + options.path + ' HTTP/1.1\n');
+  signer.update('host: ' + options.headers.host + '\n');
+  signer.update('date: ' + options.headers.Date + '\n');
+  signer.update('content-type: ' + options.headers['content-type'] + '\n');
+  signer.update('content-md5: ' + options.headers['content-md5'] + '\n');
+  signer.update('content-length: ' + options.headers['content-length']);
+  options.headers.Authorization =
+    'Signature keyId="Test",algorithm="rsa-sha256",headers=' +
+    '"request-line host date content-type content-md5 content-length"' +
+    ' ' + signer.sign(rsaPrivate, 'base64');
+
+  var req = http.request(options, function(res) {
+    t.equal(res.statusCode, 200);
+    t.end();
+  });
+  req.write('{"hello": "world"}');
+  req.end();
 });
 
 
