@@ -46,14 +46,15 @@ HTTP `Date` header.
 The client is expected to send an Authorization header (as defined in RFC 2617)
 with the following parameterization:
 
-    credentials := "Signature" params digitalSignature
-    params := 1#(keyId | [algorithm] | [headers] | [ext])
+    credentials := "Signature" params
+    params := 1#(keyId | algorithm | [headers] | [ext] | sig)
     digitalSignature := plain-string
 
     keyId := "keyId" "=" <"> plain-string <">
     algorithm := "algorithm" "=" <"> plain-string <">
     headers := "headers" "=" <"> 1#headers-value <">
     ext := "ext" "=" <"> plain-string <">
+    sig := "sig" "=" <"> plain-string <">
 
     headers-value := plain-string
     plain-string   = 1*( %x20-21 / %x23-5B / %x5D-7E )

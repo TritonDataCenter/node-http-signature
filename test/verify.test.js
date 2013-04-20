@@ -98,8 +98,8 @@ test('invalid hmac', function(t) {
 
   options.headers.Date = _rfc1123();
   options.headers.Authorization =
-    'Signature keyId="foo",algorithm="hmac-sha1" ' +
-    uuid();
+    'Signature keyId="foo",algorithm="hmac-sha1",sig="' +
+     uuid() + '"';
 
   http.get(options, function(res) {
     t.equal(res.statusCode, 200);
@@ -122,8 +122,8 @@ test('valid hmac', function(t) {
   var hmac = crypto.createHmac('sha1', hmacKey);
   hmac.update('date: ' + options.headers.Date);
   options.headers.Authorization =
-    'Signature keyId="foo",algorithm="hmac-sha1" ' +
-    hmac.digest('base64');
+    'Signature keyId="foo",algorithm="hmac-sha1",sig="' +
+    hmac.digest('base64') + '"';
 
   http.get(options, function(res) {
     t.equal(res.statusCode, 200);
@@ -144,8 +144,8 @@ test('invalid rsa', function(t) {
 
   options.headers.Date = _rfc1123();
   options.headers.Authorization =
-    'Signature keyId="foo",algorithm="rsa-sha1" ' +
-    uuid();
+    'Signature keyId="foo",algorithm="rsa-sha1",sig="' +
+    uuid() + '"';
 
   http.get(options, function(res) {
     t.equal(res.statusCode, 200);
@@ -168,8 +168,8 @@ test('valid rsa', function(t) {
   var signer = crypto.createSign('RSA-SHA256');
   signer.update('date: ' + options.headers.Date);
   options.headers.Authorization =
-    'Signature keyId="foo",algorithm="rsa-sha256" ' +
-    signer.sign(rsaPrivate, 'base64');
+    'Signature keyId="foo",algorithm="rsa-sha256",sig="' +
+    signer.sign(rsaPrivate, 'base64') + '"';
 
   http.get(options, function(res) {
     t.equal(res.statusCode, 200);
@@ -200,8 +200,8 @@ test('valid rsa from spec default', function(t) {
   var signer = crypto.createSign('RSA-SHA256');
   signer.update('date: ' + options.headers.Date);
   options.headers.Authorization =
-    'Signature keyId="Test",algorithm="rsa-sha256"' +
-    ' ' + signer.sign(rsaPrivate, 'base64');
+    'Signature keyId="Test",algorithm="rsa-sha256",sig="' +
+    signer.sign(rsaPrivate, 'base64') + '"';
 
   var req = http.request(options, function(res) {
     t.equal(res.statusCode, 200);
@@ -240,7 +240,7 @@ test('valid rsa from spec all headers', function(t) {
   options.headers.Authorization =
     'Signature keyId="Test",algorithm="rsa-sha256",headers=' +
     '"request-line host date content-type content-md5 content-length"' +
-    ' ' + signer.sign(rsaPrivate, 'base64');
+    ',sig="' + signer.sign(rsaPrivate, 'base64') + '"';
 
   var req = http.request(options, function(res) {
     t.equal(res.statusCode, 200);
