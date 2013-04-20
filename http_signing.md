@@ -160,6 +160,7 @@ Currently supported algorithm names are:
 * rsa-sha1
 * rsa-sha256
 * rsa-sha512
+* dsa-sha1
 * hmac-sha1
 * hmac-sha256
 * hmac-sha512
