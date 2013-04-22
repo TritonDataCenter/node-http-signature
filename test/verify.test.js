@@ -98,7 +98,7 @@ test('invalid hmac', function(t) {
 
   options.headers.Date = _rfc1123();
   options.headers.Authorization =
-    'Signature keyId="foo",algorithm="hmac-sha1",sig="' +
+    'Signature keyId="foo",algorithm="hmac-sha1",signature="' +
      uuid() + '"';
 
   http.get(options, function(res) {
@@ -122,7 +122,7 @@ test('valid hmac', function(t) {
   var hmac = crypto.createHmac('sha1', hmacKey);
   hmac.update('date: ' + options.headers.Date);
   options.headers.Authorization =
-    'Signature keyId="foo",algorithm="hmac-sha1",sig="' +
+    'Signature keyId="foo",algorithm="hmac-sha1",signature="' +
     hmac.digest('base64') + '"';
 
   http.get(options, function(res) {
@@ -144,7 +144,7 @@ test('invalid rsa', function(t) {
 
   options.headers.Date = _rfc1123();
   options.headers.Authorization =
-    'Signature keyId="foo",algorithm="rsa-sha1",sig="' +
+    'Signature keyId="foo",algorithm="rsa-sha1",signature="' +
     uuid() + '"';
 
   http.get(options, function(res) {
@@ -168,7 +168,7 @@ test('valid rsa', function(t) {
   var signer = crypto.createSign('RSA-SHA256');
   signer.update('date: ' + options.headers.Date);
   options.headers.Authorization =
-    'Signature keyId="foo",algorithm="rsa-sha256",sig="' +
+    'Signature keyId="foo",algorithm="rsa-sha256",signature="' +
     signer.sign(rsaPrivate, 'base64') + '"';
 
   http.get(options, function(res) {
@@ -200,7 +200,7 @@ test('valid rsa from spec default', function(t) {
   var signer = crypto.createSign('RSA-SHA256');
   signer.update('date: ' + options.headers.Date);
   options.headers.Authorization =
-    'Signature keyId="Test",algorithm="rsa-sha256",sig="' +
+    'Signature keyId="Test",algorithm="rsa-sha256",signature="' +
     signer.sign(rsaPrivate, 'base64') + '"';
 
   var req = http.request(options, function(res) {
@@ -240,7 +240,7 @@ test('valid rsa from spec all headers', function(t) {
   options.headers.Authorization =
     'Signature keyId="Test",algorithm="rsa-sha256",headers=' +
     '"request-line host date content-type content-md5 content-length"' +
-    ',sig="' + signer.sign(rsaPrivate, 'base64') + '"';
+    ',signature="' + signer.sign(rsaPrivate, 'base64') + '"';
 
   var req = http.request(options, function(res) {
     t.equal(res.statusCode, 200);
