@@ -162,7 +162,7 @@ test('key id no quotes', function(t) {
       httpSignature.parseRequest(req);
     } catch (e) {
       t.equal(e.name, 'InvalidHeaderError');
-      t.equal(e.message, 'keyId was not specified');
+      t.equal(e.message, 'bad param format');
     }
 
     res.writeHead(200);
@@ -170,7 +170,49 @@ test('key id no quotes', function(t) {
   };
 
   options.headers.Authorization =
-    'Signature keyId=foo,algorithm=hmac-sha1 aabbcc';
+    'Signature keyId=foo,algorithm=hmac-sha1,signature=aabbcc';
+  http.get(options, function(res) {
+    t.equal(res.statusCode, 200);
+    t.end();
+  });
+});
+
+
+test('key id param quotes', function(t) {
+  server.tester = function(req, res) {
+    try {
+      httpSignature.parseRequest(req);
+    } catch (e) {
+      t.equal(e.name, 'InvalidHeaderError');
+      t.equal(e.message, 'bad param format');
+    }
+
+    res.writeHead(200);
+    res.end();
+  };
+
+  options.headers.Authorization = 'Signature "keyId"="key"';
+  http.get(options, function(res) {
+    t.equal(res.statusCode, 200);
+    t.end();
+  });
+});
+
+
+test('param name with space', function(t) {
+  server.tester = function(req, res) {
+    try {
+      httpSignature.parseRequest(req);
+    } catch (e) {
+      t.equal(e.name, 'InvalidHeaderError');
+      t.equal(e.message, 'bad param format');
+    }
+
+    res.writeHead(200);
+    res.end();
+  };
+
+  options.headers.Authorization = 'Signature key Id="key"';
   http.get(options, function(res) {
     t.equal(res.statusCode, 200);
     t.end();
@@ -226,7 +268,7 @@ test('no signature', function(t) {
       httpSignature.parseRequest(req);
     } catch (e) {
       t.equal(e.name, 'InvalidHeaderError');
-      t.equal(e.message, 'signature was empty');
+      t.equal(e.message, 'signature was not specified');
     }
 
     res.writeHead(200);
@@ -255,7 +297,7 @@ test('invalid algorithm', function(t) {
   };
 
   options.headers.Authorization =
-    'Signature keyId="foo",algorithm="foo" aaabbbbcccc';
+    'Signature keyId="foo",algorithm="foo",signature="aaabbbbcccc"';
   http.get(options, function(res) {
     t.equal(res.statusCode, 200);
     t.end();
@@ -277,7 +319,7 @@ test('no date header', function(t) {
   };
 
   options.headers.Authorization =
-    'Signature keyId="foo",algorithm="rsa-sha256" aaabbbbcccc';
+    'Signature keyId="foo",algorithm="rsa-sha256",signature="aaabbbbcccc"';
   http.get(options, function(res) {
     t.equal(res.statusCode, 200);
     t.end();
@@ -298,7 +340,7 @@ test('valid default headers', function(t) {
   };
 
   options.headers.Authorization =
-    'Signature keyId="foo",algorithm="rsa-sha256" aaabbbbcccc';
+    'Signature keyId="foo",algorithm="rsa-sha256",signature="aaabbbbcccc"';
   options.headers.Date = _rfc1123();
   http.get(options, function(res) {
     t.equal(res.statusCode, 200);
@@ -322,7 +364,7 @@ test('explicit headers missing', function(t) {
 
   options.headers.Authorization =
     'Signature keyId="foo",algorithm="rsa-sha256",' +
-    'headers="date content-md5" aaabbbbcccc';
+    'headers="date content-md5",signature="aaabbbbcccc"';
   options.headers.Date = _rfc1123();
   http.get(options, function(res) {
     t.equal(res.statusCode, 200);
@@ -343,7 +385,7 @@ test('valid explicit headers', function(t) {
   options.headers.Authorization =
     'Signature keyId="fo,o",algorithm="RSA-sha256",' +
     'headers="dAtE cOntEnt-MD5 request-line",' +
-    'extensions="blah blah" digitalSignature';
+    'extensions="blah blah",signature="digitalSignature"';
   options.headers.Date = _rfc1123();
   options.headers['content-md5'] = uuid();
 
@@ -370,11 +412,11 @@ test('valid explicit headers', function(t) {
       t.equal(parsed.params.headers[0], 'date');
       t.equal(parsed.params.headers[1], 'content-md5');
       t.equal(parsed.params.headers[2], 'request-line');
-      t.equal(parsed.signature, 'digitalSignature');
+      t.equal(parsed.params.signature, 'digitalSignature');
       t.ok(parsed.signingString);
       t.equal(parsed.signingString,
-                   (options.headers.Date + '\n' +
-                    options.headers['content-md5'] + '\n' +
+                   ('date: ' + options.headers.Date + '\n' +
+                    'content-md5: ' + options.headers['content-md5'] + '\n' +
                     'GET / HTTP/1.1'));
       t.equal(parsed.params.keyId, parsed.keyId);
       t.equal(parsed.params.algorithm.toUpperCase(),
@@ -407,7 +449,7 @@ test('expired', function(t) {
 
   options.headers.Authorization =
     'Signature keyId="f,oo",algorithm="RSA-sha256",' +
-    'headers="dAtE cOntEnt-MD5" digitalSignature';
+    'headers="dAtE cOntEnt-MD5",signature="digitalSignature"';
   options.headers.Date = _rfc1123();
   options.headers['content-md5'] = uuid();
   http.get(options, function(res) {
@@ -437,7 +479,7 @@ test('missing required header', function(t) {
 
   options.headers.Authorization =
     'Signature keyId="f,oo",algorithm="RSA-sha256",' +
-    'headers="dAtE cOntEnt-MD5" digitalSignature';
+    'headers="dAtE cOntEnt-MD5",signature="digitalSignature"';
   options.headers.Date = _rfc1123();
   options.headers['content-md5'] = uuid();
   http.get(options, function(res) {
@@ -467,7 +509,7 @@ test('not whitelisted algorithm', function(t) {
 
   options.headers.Authorization =
     'Signature keyId="f,oo",algorithm="RSA-sha256",' +
-    'headers="dAtE cOntEnt-MD5" digitalSignature';
+    'headers="dAtE cOntEnt-MD5",signature="digitalSignature"';
   options.headers.Date = _rfc1123();
   options.headers['content-md5'] = uuid();
   http.get(options, function(res) {
