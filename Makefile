@@ -43,7 +43,7 @@ all: $(REPO_DEPS)
 CLEAN_FILES += $(TAP) ./node_modules/tap
 
 .PHONY: test
-test:
+test: all
 	TAP=1 $(TAP) test/*.test.js
 
 include ./tools/mk/Makefile.deps
