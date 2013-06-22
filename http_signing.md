@@ -17,7 +17,7 @@ This protocol is intended to provide a standard way for clients to sign HTTP
 requests.  RFC2617 (HTTP Authentication) defines Basic and Digest authentication
 mechanisms, and RFC5246 (TLS 1.2) defines client-auth, both of which are widely
 employed on the Internet today.  However, it is common place that the burdens of
-PKI prevent web service operators from deploying that methodoloy, and so many
+PKI prevent web service operators from deploying that methodology, and so many
 fall back to Basic authentication, which has poor security characteristics.
 
 Additionally, OAuth provides a fully-specified alternative for authorization
@@ -195,7 +195,7 @@ against any tampering from clients.
 ## Nonces
 
 Nonces are out of scope for this document simply because many service providers
-fail to implement them correctly, or do not adopt security specfiications
+fail to implement them correctly, or do not adopt security specifications
 because of the infrastructure complexity.  Given the `header` parameterization,
 a service provider is fully enabled to add nonce semantics into this scheme by
 using something like an `x-request-nonce` header, and ensuring it is signed
@@ -234,12 +234,12 @@ will want to enforce, but service providers SHOULD at minimum include the
 The following test data uses the RSA (2048b) keys, which we will refer
 to as `keyId=Test` in the following samples:
 
-   -----BEGIN PUBLIC KEY-----
-   MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDCFENGw33yGihy92pDjZQhl0C3
-   6rPJj+CvfSC8+q28hxA161QFNUd13wuCTUcq0Qd2qsBe/2hFyc2DCJJg0h1L78+6
-   Z4UMR7EOcpfdUE9Hf3m/hs+FUR45uBJeDK1HSFHD8bHKD6kv8FPGfJTotc+2xjJw
-   oYi+1hqp1fIekaxsyQIDAQAB
-   -----END PUBLIC KEY-----
+    -----BEGIN PUBLIC KEY-----
+    MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDCFENGw33yGihy92pDjZQhl0C3
+    6rPJj+CvfSC8+q28hxA161QFNUd13wuCTUcq0Qd2qsBe/2hFyc2DCJJg0h1L78+6
+    Z4UMR7EOcpfdUE9Hf3m/hs+FUR45uBJeDK1HSFHD8bHKD6kv8FPGfJTotc+2xjJw
+    oYi+1hqp1fIekaxsyQIDAQAB
+    -----END PUBLIC KEY-----
 
     -----BEGIN RSA PRIVATE KEY-----
     MIICXgIBAAKBgQDCFENGw33yGihy92pDjZQhl0C36rPJj+CvfSC8+q28hxA161QF
