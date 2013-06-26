@@ -109,14 +109,14 @@ the values of each HTTP header specified by `headers` in the order they appear.
 
 1. If the header name is not `request-line` then append the lowercased header
    name followed with an ASCII colon `:` and an ASCII space ` `.
-2. If the header name is `request-line` then appened the HTTP request line,
+2. If the header name is `request-line` then append the HTTP request line,
    otherwise append the header value.
 3. If value is not the last value then append an ASCII newline `\n`. The string
    MUST NOT include a trailing ASCII newline.
 
 # Example Requests
 
-All requests refer to the following request (body ommitted):
+All requests refer to the following request (body omitted):
 
     POST /foo HTTP/1.1
     Host: example.org
@@ -182,7 +182,7 @@ Currently supported algorithm names are:
 Note the default parameterization of the `Signature` scheme is only safe if all
 requests are carried over a secure transport (i.e., TLS).  Sending the default
 scheme over a non-secure transport will leave the request vulnerable to
-spoofing, tampering, replay/repudiaton, and integrity violations (if using the
+spoofing, tampering, replay/repudiation, and integrity violations (if using the
 STRIDE threat-modeling methodology).
 
 ## Insecure Transports
