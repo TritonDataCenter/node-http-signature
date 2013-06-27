@@ -6,7 +6,7 @@ for Joyent's [HTTP Signature Scheme](http_signing.md).
 ## Usage
 
 Note the example below signs a request with the same key/cert used to start an
-HTTP server. This is almost certainly not what you actaully want, but is just
+HTTP server. This is almost certainly not what you actually want, but is just
 used to illustrate the API calls; you will need to provide your own key
 management in addition to this library.
 

@@ -17,7 +17,7 @@ This protocol is intended to provide a standard way for clients to sign HTTP
 requests.  RFC2617 (HTTP Authentication) defines Basic and Digest authentication
 mechanisms, and RFC5246 (TLS 1.2) defines client-auth, both of which are widely
 employed on the Internet today.  However, it is common place that the burdens of
-PKI prevent web service operators from deploying that methodoloy, and so many
+PKI prevent web service operators from deploying that methodology, and so many
 fall back to Basic authentication, which has poor security characteristics.
 
 Additionally, OAuth provides a fully-specified alternative for authorization
@@ -109,14 +109,14 @@ the values of each HTTP header specified by `headers` in the order they appear.
 
 1. If the header name is not `request-line` then append the lowercased header
    name followed with an ASCII colon `:` and an ASCII space ` `.
-2. If the header name is `request-line` then appened the HTTP request line,
+2. If the header name is `request-line` then append the HTTP request line,
    otherwise append the header value.
 3. If value is not the last value then append an ASCII newline `\n`. The string
    MUST NOT include a trailing ASCII newline.
 
 # Example Requests
 
-All requests refer to the following request (body ommitted):
+All requests refer to the following request (body omitted):
 
     POST /foo HTTP/1.1
     Host: example.org
@@ -182,7 +182,7 @@ Currently supported algorithm names are:
 Note the default parameterization of the `Signature` scheme is only safe if all
 requests are carried over a secure transport (i.e., TLS).  Sending the default
 scheme over a non-secure transport will leave the request vulnerable to
-spoofing, tampering, replay/repudiaton, and integrity violations (if using the
+spoofing, tampering, replay/repudiation, and integrity violations (if using the
 STRIDE threat-modeling methodology).
 
 ## Insecure Transports
@@ -195,7 +195,7 @@ against any tampering from clients.
 ## Nonces
 
 Nonces are out of scope for this document simply because many service providers
-fail to implement them correctly, or do not adopt security specfiications
+fail to implement them correctly, or do not adopt security specifications
 because of the infrastructure complexity.  Given the `header` parameterization,
 a service provider is fully enabled to add nonce semantics into this scheme by
 using something like an `x-request-nonce` header, and ensuring it is signed
@@ -234,12 +234,12 @@ will want to enforce, but service providers SHOULD at minimum include the
 The following test data uses the RSA (2048b) keys, which we will refer
 to as `keyId=Test` in the following samples:
 
-   -----BEGIN PUBLIC KEY-----
-   MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDCFENGw33yGihy92pDjZQhl0C3
-   6rPJj+CvfSC8+q28hxA161QFNUd13wuCTUcq0Qd2qsBe/2hFyc2DCJJg0h1L78+6
-   Z4UMR7EOcpfdUE9Hf3m/hs+FUR45uBJeDK1HSFHD8bHKD6kv8FPGfJTotc+2xjJw
-   oYi+1hqp1fIekaxsyQIDAQAB
-   -----END PUBLIC KEY-----
+    -----BEGIN PUBLIC KEY-----
+    MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDCFENGw33yGihy92pDjZQhl0C3
+    6rPJj+CvfSC8+q28hxA161QFNUd13wuCTUcq0Qd2qsBe/2hFyc2DCJJg0h1L78+6
+    Z4UMR7EOcpfdUE9Hf3m/hs+FUR45uBJeDK1HSFHD8bHKD6kv8FPGfJTotc+2xjJw
+    oYi+1hqp1fIekaxsyQIDAQAB
+    -----END PUBLIC KEY-----
 
     -----BEGIN RSA PRIVATE KEY-----
     MIICXgIBAAKBgQDCFENGw33yGihy92pDjZQhl0C36rPJj+CvfSC8+q28hxA161QF
