@@ -12,55 +12,59 @@ management in addition to this library.
 
 ### Client
 
-    var fs = require('fs');
-    var https = require('https');
-    var httpSignature = require('http-signature');
+```js
+var fs = require('fs');
+var https = require('https');
+var httpSignature = require('http-signature');
 
-    var key = fs.readFileSync('./key.pem', 'ascii');
+var key = fs.readFileSync('./key.pem', 'ascii');
 
-    var options = {
-      host: 'localhost',
-      port: 8443,
-      path: '/',
-      method: 'GET',
-      headers: {}
-    };
+var options = {
+  host: 'localhost',
+  port: 8443,
+  path: '/',
+  method: 'GET',
+  headers: {}
+};
 
-    // Adds a 'Date' header in, signs it, and adds the
-    // 'Authorization' header in.
-    var req = https.request(options, function(res) {
-      console.log(res.statusCode);
-    });
+// Adds a 'Date' header in, signs it, and adds the
+// 'Authorization' header in.
+var req = https.request(options, function(res) {
+  console.log(res.statusCode);
+});
 
 
-    httpSignature.sign(req, {
-      key: key,
-      keyId: './cert.pem'
-    });
+httpSignature.sign(req, {
+  key: key,
+  keyId: './cert.pem'
+});
 
-    req.end();
+req.end();
+```
 
 ### Server
 
-    var fs = require('fs');
-    var https = require('https');
-    var httpSignature = require('http-signature');
+```js
+var fs = require('fs');
+var https = require('https');
+var httpSignature = require('http-signature');
 
-    var options = {
-      key: fs.readFileSync('./key.pem'),
-      cert: fs.readFileSync('./cert.pem')
-    };
+var options = {
+  key: fs.readFileSync('./key.pem'),
+  cert: fs.readFileSync('./cert.pem')
+};
 
-    https.createServer(options, function (req, res) {
-      var rc = 200;
-      var parsed = httpSignature.parseRequest(req);
-      var pub = fs.readFileSync(parsed.keyId, 'ascii');
-      if (!httpSignature.verifySignature(parsed, pub))
-        rc = 401;
+https.createServer(options, function (req, res) {
+  var rc = 200;
+  var parsed = httpSignature.parseRequest(req);
+  var pub = fs.readFileSync(parsed.keyId, 'ascii');
+  if (!httpSignature.verifySignature(parsed, pub))
+    rc = 401;
 
-      res.writeHead(rc);
-      res.end();
-    }).listen(8443);
+  res.writeHead(rc);
+  res.end();
+}).listen(8443);
+```
 
 ## Installation
 
