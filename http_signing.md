@@ -276,7 +276,7 @@ The string to sign would be:
 
 The Authorization header would be:
 
-    Authorization: Signature keyId="Test",algorithm="rsa-sha256",signature="JldXnt8W9t643M2Sce10gqCh/+E7QIYLiI+bSjnFBGCti7s+mPPvOjVb72sbd1FjeOUwPTDpKbrQQORrm+xBYfAwCxF3LBSSzORvyJ5nRFCFxfJ3nlQD6Kdxhw8wrVZX5nSem4A/W3C8qH5uhFTRwF4ruRjh+ENHWuovPgO/HGQ="
+    Authorization: Signature keyId="Test",algorithm="rsa-sha256",signature="ATp0r26dbMIxOopqw0OfABDT7CKMIoENumuruOtarj8n/97Q3htHFYpH8yOSQk3Z5zh8UxUym6FYTb5+A0Nz3NRsXJibnYi7brE/4tx5But9kkFGzG+xpUmimN4c3TMN7OFH//+r8hBf7BT9/GmHDUVZT2JzWGLZES2xDOUuMtA="
 
 ### All Headers
 
@@ -292,5 +292,5 @@ inserted for readability):
 
 The Authorization header would be:
 
-    Authorization: Signature keyId="Test",algorithm="rsa-sha256",headers="request-line host date content-type content-md5 content-length",signature="Gm7W/r+e90REDpWytALMrft4MqZxCmslOTOvwJX17ViEBA5E65QqvWI0vIH3l/vSsGiaMVmuUgzYsJLYMLcm5dGrv1+a+0fCoUdVKPZWHyImQEqpLkopVwqEH67LVECFBqFTAKlQgBn676zrfXQbb+b/VebAsNUtvQMe6cTjnDY="
+    Authorization: Signature keyId="Test",algorithm="rsa-sha256",headers="request-line host date content-type content-md5 content-length",signature="H/AaTDkJvLELy4i1RujnKlS6dm8QWiJvEpn9cKRMi49kKF+mohZ15z1r+mF+XiKS5kOOscyS83olfBtsVhYjPg2Ei3/D9D4Mvb7bFm9IaLJgYTFFuQCghrKQQFPiqJN320emjHxFowpIm1BkstnEU7lktH/XdXVBo8a6Uteiztw="
 
