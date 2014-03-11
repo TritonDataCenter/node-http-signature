@@ -4,6 +4,7 @@ var test = require('tap').test;
 
 var sshKeyFingerprint = require('../lib/index').sshKeyFingerprint;
 var sshKeyToPEM = require('../lib/index').sshKeyToPEM;
+var pemToRsaSSHKey = require('../lib/index').pemToRsaSSHKey;
 
 
 
@@ -85,11 +86,25 @@ var DSA_1024_PEM = '-----BEGIN PUBLIC KEY-----\n' +
 
 ///--- Tests
 
+test('1024b pem to rsa ssh key', function(t) {
+  t.equal(pemToRsaSSHKey(PEM_1024, 'mark@foo.local'), SSH_1024);
+  t.end();
+});
+
+test('2048b pem to rsa ssh key', function(t) {
+  t.equal(pemToRsaSSHKey(PEM_2048, 'mark@bluesnoop.local'), SSH_2048);
+  t.end();
+});
+
+test('4096b pem to rsa ssh key', function(t) {
+  t.equal(pemToRsaSSHKey(PEM_4096, 'mark@bluesnoop.local'), SSH_4096);
+  t.end();
+});
+
 test('1024b rsa ssh key', function(t) {
   t.equal(sshKeyToPEM(SSH_1024), PEM_1024);
   t.end();
 });
-
 
 test('2048b rsa ssh key', function(t) {
   t.equal(sshKeyToPEM(SSH_2048), PEM_2048);
