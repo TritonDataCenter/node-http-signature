@@ -3,6 +3,7 @@
 var crypto = require('crypto');
 var fs = require('fs');
 var http = require('http');
+var nacl = require('tweetnacl');
 
 var test = require('tap').test;
 var uuid = require('node-uuid');
@@ -19,7 +20,9 @@ var rsaPrivate = null;
 var rsaPublic = null;
 var server = null;
 var socket = null;
-
+var keypair = null;
+var ed25519Private = null;
+var ed25519Public = null;
 
 
 // --- Helpers
@@ -67,6 +70,13 @@ test('setup', function(t) {
   rsaPublic = fs.readFileSync(__dirname + '/rsa_public.pem', 'ascii');
   t.ok(rsaPrivate);
   t.ok(rsaPublic);
+
+  keypair = nacl.sign.keyPair();
+  ed25519Private = nacl.util.encodeBase64(keypair.secretKey);
+  ed25519Public = nacl.util.encodeBase64(keypair.publicKey);
+
+  t.ok(ed25519Private);
+  t.ok(ed25519Public);
 
   hmacKey = uuid();
   socket = '/tmp/.' + uuid();
@@ -132,6 +142,53 @@ test('valid hmac', function(t) {
 });
 
 
+test('invalid ed25519', function(t) {
+  server.tester = function(req, res) {
+    var parsed = httpSignature.parseRequest(req);
+    t.ok(!httpSignature.verify(parsed, ed25519Public));
+
+    res.writeHead(200);
+    res.write(JSON.stringify(parsed, null, 2));
+    res.end();
+  };
+
+  var message = nacl.util.decodeUTF8('blah');
+  var signature = nacl.sign.detached(message, nacl.sign.keyPair().secretKey)
+
+  options.headers.Date = _rfc1123();
+  options.headers.Authorization =
+    'Signature keyId="foo",algorithm="ed25519-sha512",signature="' +
+    nacl.util.encodeBase64(signature) + '"';
+
+  http.get(options, function(res) {
+    t.equal(res.statusCode, 200);
+    t.end();
+  });
+});
+
+test('valid ed25519', function(t) {
+  server.tester = function(req, res) {
+    var parsed = httpSignature.parseRequest(req);
+    t.ok(httpSignature.verify(parsed, ed25519Public));
+
+    res.writeHead(200);
+    res.write(JSON.stringify(parsed, null, 2));
+    res.end();
+  };
+
+  options.headers.Date = _rfc1123();
+  var message = nacl.util.decodeUTF8('date: ' + options.headers.Date);
+  var signature = nacl.sign.detached(message, keypair.secretKey);
+  options.headers.Authorization =
+    'Signature keyId="foo",algorithm="ed25519-sha512",signature="' +
+    nacl.util.encodeBase64(signature) + '"';
+
+  http.get(options, function(res) {
+    t.equal(res.statusCode, 200);
+    t.end();
+  });
+});
+
 test('invalid rsa', function(t) {
   server.tester = function(req, res) {
     var parsed = httpSignature.parseRequest(req);
@@ -177,6 +234,33 @@ test('valid rsa', function(t) {
   });
 });
 
+test('invalid date', function(t) {
+  server.tester = function(req, res) {
+    t.throws(function() {
+      httpSignature.parseRequest(req);
+    });
+
+    res.writeHead(400);
+    res.end();
+  };
+
+  options.method = 'POST';
+  options.path = '/';
+  options.headers.host = 'example.com';
+  // very old, out of valid date range
+  options.headers.Date = 'Sat, 01 Jan 2000 00:00:00 GMT';
+  var message = nacl.util.decodeUTF8('date: ' + options.headers.Date);
+  var signature = nacl.sign.detached(message, keypair.secretKey);
+  options.headers.Authorization =
+    'Signature keyId="Test",algorithm="ed25519-sha512",signature="' +
+    nacl.util.encodeBase64(signature) + '"';
+
+  var req = http.request(options, function(res) {
+    t.equal(res.statusCode, 400);
+    t.end();
+  });
+  req.end();
+});
 
 test('invalid date', function(t) {
   server.tester = function(req, res) {

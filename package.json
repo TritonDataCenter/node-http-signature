@@ -28,7 +28,8 @@
   "dependencies": {
     "assert-plus": "^0.1.5",
     "asn1": "0.1.11",
-    "ctype": "0.5.3"
+    "ctype": "0.5.3",
+    "tweetnacl": "^0.12.2"
   },
   "devDependencies": {
     "node-uuid": "^1.4.1",

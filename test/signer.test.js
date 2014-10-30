@@ -3,6 +3,7 @@
 var crypto = require('crypto');
 var fs = require('fs');
 var http = require('http');
+var nacl = require('tweetnacl');
 
 var test = require('tap').test;
 var uuid = require('node-uuid');
@@ -19,7 +20,9 @@ var rsaPrivate = null;
 var signOptions = null;
 var server = null;
 var socket = null;
-
+var keypair = nacl.sign.keyPair();
+var ed25519Private = nacl.util.encodeBase64(keypair.secretKey);
+var ed25519Public = nacl.util.encodeBase64(keypair.publicKey);
 
 
 ///--- Tests
@@ -82,6 +85,21 @@ test('request line', function(t) {
   req.end();
 });
 
+test('ed25519', function(t) {
+  var req = http.request(httpOptions, function(res) {
+    t.end();
+  });
+  var opts = {
+    keyId: 'unit',
+    key: ed25519Private,
+    algorithm: 'ed25519-sha512'
+  };
+
+  t.ok(httpSignature.sign(req, opts));
+  t.ok(req.getHeader('Authorization'));
+  console.log('> ' + req.getHeader('Authorization'));
+  req.end();
+});
 
 test('hmac', function(t) {
   var req = http.request(httpOptions, function(res) {

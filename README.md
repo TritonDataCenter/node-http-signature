@@ -3,6 +3,8 @@
 node-http-signature is a node.js library that has client and server components
 for Joyent's [HTTP Signature Scheme](http_signing.md).
 
+*This fork includes support for the [Ed25519](http://ed25519.cr.yp.to) signature scheme.
+
 ## Usage
 
 Note the example below signs a request with the same key/cert used to start an
