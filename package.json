@@ -1,13 +1,23 @@
 {
   "name": "http-signature",
-  "version": "0.10.0",
   "description": "Reference implementation of Joyent's HTTP Signature scheme.",
+  "version": "0.10.0",
   "license": "MIT",
   "author": "Joyent, Inc",
+  "contributors": [
+    "Mark Cavage <mcavage@gmail.com>",
+    "David I. Lehn <dil@lehn.org>"
+  ],
   "repository": {
     "type": "git",
     "url": "git://github.com/joyent/node-http-signature.git"
   },
+  "homepage": "https://github.com/joyent/node-http-signature/",
+  "bugs": "https://github.com/joyent/node-http-signature/issues",
+  "keywords": [
+    "https",
+    "request"
+  ],
   "engines": {
     "node": ">=0.8"
   },
