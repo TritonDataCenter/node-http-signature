@@ -22,5 +22,6 @@
   "devDependencies": {
     "node-uuid": "1.4.0",
     "tap": "0.4.2"
-  }
+  },
+  "license": "MIT"
 }
