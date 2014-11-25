@@ -1,7 +1,7 @@
 {
   "name": "http-signature",
   "description": "Reference implementation of Joyent's HTTP Signature scheme.",
-  "version": "0.10.0",
+  "version": "0.10.1",
   "license": "MIT",
   "author": "Joyent, Inc",
   "contributors": [
