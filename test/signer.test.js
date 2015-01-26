@@ -83,6 +83,23 @@ test('request line', function(t) {
 });
 
 
+test('ext', function(t) {
+  var req = http.request(httpOptions, function(res) {
+    t.end();
+  });
+  var opts = {
+    keyId: 'Test',
+    key: rsaPrivate,
+    headers: ['date'],
+    ext: uuid().toString()
+  };
+
+  t.ok(httpSignature.sign(req, opts));
+  t.ok(req.getHeader('Authorization'));
+  console.log('> ' + req.getHeader('Authorization'));
+  req.end();
+});
+
 test('hmac', function(t) {
   var req = http.request(httpOptions, function(res) {
     t.end();
