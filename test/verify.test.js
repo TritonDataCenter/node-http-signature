@@ -281,6 +281,47 @@ test('valid rsa from spec default', function(t) {
   req.end();
 });
 
+// test values from spec for defaults with ext
+test('valid rsa from spec default with ext', function(t) {
+  var ext = 'ced3e19c-737a-4343-b158-d1366c1bd9f8';
+  server.tester = function(req, res) {
+    console.log('> [DEFAULT + ext]', req.headers.authorization);
+    var parsed = httpSignature.parseRequest(req, {
+      // this test uses a fixed old date so ignore clock skew
+      clockSkew: Number.MAX_VALUE
+    });
+    t.ok(httpSignature.verify(parsed, rsaPublic));
+    // check known signature
+    t.ok(req.headers.authorization === 'Signature keyId="Test",algorithm="rsa-sha256",headers="date",ext="ced3e19c-737a-4343-b158-d1366c1bd9f8",signature="cYSjwH34crL8V5tWZqph+zVNsFKwfehVC5JXvqO4mudm9ysf/YriyDHZqRXEYo9QxQ6j6cIlPqvqdrc/o3vywLtSKHya3aTyXLDUnQfyR2tGPLJGeCX2iVm2OdX0otvqjkSx8SrG66nUD72y+rEmuJ2FXCLBlFB/+w3pizhMN8E="');
+    t.ok(parsed.params.ext === ext);
+
+    res.writeHead(200);
+    res.write(JSON.stringify(parsed, null, 2));
+    res.end();
+  };
+
+  options.method = 'POST';
+  options.path = '/foo?param=value&pet=dog';
+  options.headers.host = 'example.com';
+  options.headers.Date = 'Mon, 26 Jan 2015 17:49:50 GMT';
+  options.headers['content-type'] = 'application/json';
+  options.headers['content-md5'] = 'Sd/dVLAcvNLSq16eXua5uQ==';
+  options.headers['content-length'] = '18';
+  options.ext = ext;
+  var signer = crypto.createSign('RSA-SHA256');
+  signer.update('date: ' + options.headers.Date);
+  options.headers.Authorization =
+    'Signature keyId="Test",algorithm="rsa-sha256",headers="date",ext="ced3e19c-737a-4343-b158-d1366c1bd9f8",signature="' +
+    signer.sign(rsaPrivate, 'base64') + '"';
+
+  var req = http.request(options, function(res) {
+    t.equal(res.statusCode, 200);
+    t.end();
+  });
+  req.write('{"hello": "world"}');
+  req.end();
+});
+
 // test values from spec for all headers
 test('valid rsa from spec all headers', function(t) {
   server.tester = function(req, res) {
