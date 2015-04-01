@@ -89,7 +89,7 @@ test('setup', function(t) {
 test('invalid hmac', function(t) {
   server.tester = function(req, res) {
     var parsed = httpSignature.parseRequest(req);
-    t.ok(!httpSignature.verify(parsed, hmacKey));
+    t.ok(!httpSignature.verifyHMAC(parsed, hmacKey));
 
     res.writeHead(200);
     res.write(JSON.stringify(parsed, null, 2));
@@ -111,7 +111,7 @@ test('invalid hmac', function(t) {
 test('valid hmac', function(t) {
   server.tester = function(req, res) {
     var parsed = httpSignature.parseRequest(req);
-    t.ok(httpSignature.verify(parsed, hmacKey));
+    t.ok(httpSignature.verifyHMAC(parsed, hmacKey));
 
     res.writeHead(200);
     res.write(JSON.stringify(parsed, null, 2));
