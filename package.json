@@ -1,12 +1,13 @@
 {
   "name": "http-signature",
   "description": "Reference implementation of Joyent's HTTP Signature scheme.",
-  "version": "0.10.1",
+  "version": "0.11.0",
   "license": "MIT",
   "author": "Joyent, Inc",
   "contributors": [
     "Mark Cavage <mcavage@gmail.com>",
-    "David I. Lehn <dil@lehn.org>"
+    "David I. Lehn <dil@lehn.org>",
+    "Patrick Mooney <patrick.f.mooney@gmail.com>"
   ],
   "repository": {
     "type": "git",
