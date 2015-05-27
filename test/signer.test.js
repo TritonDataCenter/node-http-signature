@@ -66,7 +66,7 @@ test('defaults', function(t) {
 });
 
 
-test('request line', function(t) {
+test('request line strict unspecified', function(t) {
   var req = http.request(httpOptions, function(res) {
     t.end();
   });
@@ -82,6 +82,55 @@ test('request line', function(t) {
   req.end();
 });
 
+test('request line strict false', function(t) {
+  var req = http.request(httpOptions, function(res) {
+    t.end();
+  });
+  var opts = {
+    keyId: 'unit',
+    key: rsaPrivate,
+    headers: ['date', 'request-line'],
+    strict: false
+  };
+
+  t.ok(httpSignature.sign(req, opts));
+  t.ok(req.getHeader('Authorization'));
+  console.log('> ' + req.getHeader('Authorization'));
+  req.end();
+});
+
+test('request line strict true', function(t) {
+  var req = http.request(httpOptions, function(res) {
+    t.end();
+  });
+  var opts = {
+    keyId: 'unit',
+    key: rsaPrivate,
+    headers: ['date', 'request-line'],
+    strict: true
+  };
+
+  t.throws(function() {
+     httpSignature.sign(req, opts)
+   });
+  req.end();
+});
+
+test('request target', function(t) {
+  var req = http.request(httpOptions, function(res) {
+    t.end();
+  });
+  var opts = {
+    keyId: 'unit',
+    key: rsaPrivate,
+    headers: ['date', '(request-target)']
+  };
+
+  t.ok(httpSignature.sign(req, opts));
+  t.ok(req.getHeader('Authorization'));
+  console.log('> ' + req.getHeader('Authorization'));
+  req.end();
+});
 
 test('hmac', function(t) {
   var req = http.request(httpOptions, function(res) {
