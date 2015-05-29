@@ -369,6 +369,58 @@ test('valid rsa from spec all headers', function(t) {
   req.end();
 });
 
+test('valid rsa from spec all headers (request-target)', function(t) {
+  var jsonMessage = '{"hello": "world"}';
+  var sha256sum = crypto.createHash('sha256');
+  sha256sum.update(jsonMessage);
+
+  server.tester = function(req, res) {
+    console.log('> [ALL]', req.headers.authorization);
+    var parsed = httpSignature.parseRequest(req, {
+      // this test uses a fixed old date so ignore clock skew
+      clockSkew: Number.MAX_VALUE
+    });
+    t.ok(httpSignature.verify(parsed, rsaPublic));
+    // check known signature
+    t.ok(req.headers.authorization === 'Signature keyId="Test",algorithm="rsa-sha256",headers="(request-target) host date content-type digest content-length",signature="U2w+wCBXdcUTpb2Xb05Cht26ogGPtZN4CEEqLJdt5cdPz+fnspZ9sp5rnimNxXUPOkRYoKKC09Q0yeZ8Bd3gLvZ3Lmd07IgpdCkjv0QITmaab3rQloQfuo7t4y9enSg2q2BhPXVRhlhiBp2irEmD8Ghz0zE9PvRpLATVeguS5i4="');
+
+    res.writeHead(200);
+    res.write(JSON.stringify(parsed, null, 2));
+    res.end();
+  };
+
+
+
+  options.method = 'POST';
+  options.path = '/foo?param=value&pet=dog';
+  options.headers.host = 'example.com';
+  options.headers.Date = 'Thu, 05 Jan 2012 21:31:40 GMT';
+  options.headers['content-type'] = 'application/json';
+  options.headers['digest'] = 'SHA-256=' + sha256sum.digest('base64');
+  console.log('digest', options.headers['digest']);
+  options.headers['content-length'] = '' + (jsonMessage.length - 1);
+  var signer = crypto.createSign('RSA-SHA256');
+
+  signer.update('(request-target): ' + options.method.toLowerCase() + ' ' + options.path + '\n');
+  signer.update('host: ' + options.headers.host + '\n');
+  signer.update('date: ' + options.headers.Date + '\n');
+  signer.update('content-type: ' + options.headers['content-type'] + '\n');
+  signer.update('digest: ' + options.headers['digest'] + '\n');
+  signer.update('content-length: ' + options.headers['content-length']);
+
+  options.headers.Authorization =
+    'Signature keyId="Test",algorithm="rsa-sha256",headers=' +
+    '"(request-target) host date content-type digest content-length"' +
+    ',signature="' + signer.sign(rsaPrivate, 'base64') + '"';
+
+  var req = http.request(options, function(res) {
+    t.equal(res.statusCode, 200);
+    t.end();
+  });
+  req.write(jsonMessage);
+  req.end();
+});
+
 
 test('tear down', function(t) {
   server.on('close', function() {
