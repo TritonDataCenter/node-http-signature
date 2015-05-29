@@ -373,7 +373,7 @@ test('explicit headers missing', function(t) {
 });
 
 
-test('valid explicit headers', function(t) {
+test('valid explicit headers request-line', function(t) {
   server.tester = function(req, res) {
     var parsed = httpSignature.parseRequest(req);
     res.writeHead(200);
@@ -418,6 +418,87 @@ test('valid explicit headers', function(t) {
                    ('date: ' + options.headers.Date + '\n' +
                     'content-md5: ' + options.headers['content-md5'] + '\n' +
                     'GET / HTTP/1.1'));
+      t.equal(parsed.params.keyId, parsed.keyId);
+      t.equal(parsed.params.algorithm.toUpperCase(),
+              parsed.algorithm);
+      t.end();
+    });
+  });
+});
+
+test('valid explicit headers request-line strict true', function(t) {
+  server.tester = function(req, res) {
+
+    try {
+      httpSignature.parseRequest(req, {strict: true});
+    } catch (e) {
+      t.equal(e.name, 'StrictParsingError');
+      t.equal(e.message, 'request-line is not a valid header with strict parsing enabled.');
+    }
+
+    res.writeHead(200);
+    res.end();
+  };
+
+
+  options.headers.Authorization =
+    'Signature keyId="fo,o",algorithm="RSA-sha256",' +
+    'headers="dAtE cOntEnt-MD5 request-line",' +
+    'extensions="blah blah",signature="digitalSignature"';
+  options.headers.Date = _rfc1123();
+  options.headers['content-md5'] = uuid();
+
+  http.get(options, function(res) {
+    t.equal(res.statusCode, 200);
+    t.end();
+  });
+});
+
+test('valid explicit headers request-target', function(t) {
+  server.tester = function(req, res) {
+    var parsed = httpSignature.parseRequest(req);
+    res.writeHead(200);
+    res.write(JSON.stringify(parsed, null, 2));
+    res.end();
+  };
+
+
+  options.headers.Authorization =
+    'Signature keyId="fo,o",algorithm="RSA-sha256",' +
+    'headers="dAtE cOntEnt-MD5 (request-target)",' +
+    'extensions="blah blah",signature="digitalSignature"';
+  options.headers.Date = _rfc1123();
+  options.headers['content-md5'] = uuid();
+
+  http.get(options, function(res) {
+    t.equal(res.statusCode, 200);
+
+    var body = '';
+    res.setEncoding('utf8');
+    res.on('data', function(chunk) {
+      body += chunk;
+    });
+
+    res.on('end', function() {
+      console.log(body);
+      var parsed = JSON.parse(body);
+      t.ok(parsed);
+      t.equal(parsed.scheme, 'Signature');
+      t.ok(parsed.params);
+      t.equal(parsed.params.keyId, 'fo,o');
+      t.equal(parsed.params.algorithm, 'rsa-sha256');
+      t.equal(parsed.params.extensions, 'blah blah');
+      t.ok(parsed.params.headers);
+      t.equal(parsed.params.headers.length, 3);
+      t.equal(parsed.params.headers[0], 'date');
+      t.equal(parsed.params.headers[1], 'content-md5');
+      t.equal(parsed.params.headers[2], '(request-target)');
+      t.equal(parsed.params.signature, 'digitalSignature');
+      t.ok(parsed.signingString);
+      t.equal(parsed.signingString,
+                   ('date: ' + options.headers.Date + '\n' +
+                    'content-md5: ' + options.headers['content-md5'] + '\n' +
+                    '(request-target): get /'));
       t.equal(parsed.params.keyId, parsed.keyId);
       t.equal(parsed.params.algorithm.toUpperCase(),
               parsed.algorithm);
