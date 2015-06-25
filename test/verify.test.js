@@ -254,7 +254,7 @@ test('invalid date', function(t) {
 // test values from spec for simple test
 test('valid rsa from spec default', function(t) {
   server.tester = function(req, res) {
-    console.log('> [SIMPLE]', req.headers.authorization);
+    console.log('> [DEFAULT]', req.headers.authorization);
     var parsed = httpSignature.parseRequest(req, {
       // this test uses a fixed old date so ignore clock skew
       clockSkew: Number.MAX_VALUE
@@ -289,6 +289,10 @@ test('valid rsa from spec default', function(t) {
 
 // test values from spec for defaults
 test('valid rsa from spec default', function(t) {
+  var jsonMessage = '{"hello": "world"}';
+  var sha256sum = crypto.createHash('sha256');
+  sha256sum.update(jsonMessage)
+
   server.tester = function(req, res) {
     console.log('> [DEFAULT]', req.headers.authorization);
     var parsed = httpSignature.parseRequest(req, {
@@ -297,7 +301,7 @@ test('valid rsa from spec default', function(t) {
     });
     t.ok(httpSignature.verify(parsed, rsaPublic));
     // check known signature
-    t.ok(req.headers.authorization === 'Signature keyId="Test",algorithm="rsa-sha256",signature="ATp0r26dbMIxOopqw0OfABDT7CKMIoENumuruOtarj8n/97Q3htHFYpH8yOSQk3Z5zh8UxUym6FYTb5+A0Nz3NRsXJibnYi7brE/4tx5But9kkFGzG+xpUmimN4c3TMN7OFH//+r8hBf7BT9/GmHDUVZT2JzWGLZES2xDOUuMtA="');
+    t.ok(req.headers.authorization === 'Signature keyId="Test",algorithm="rsa-sha256",signature="jKyvPcxB4JbmYY4mByyBY7cZfNl4OW9HpFQlG7N4YcJPteKTu4MWCLyk+gIr0wDgqtLWf9NLpMAMimdfsH7FSWGfbMFSrsVTHNTk0rK3usrfFnti1dxsM4jl0kYJCKTGI/UWkqiaxwNiKqGcdlEDrTcUhhsFsOIo8VhddmZTZ8w="');
 
     res.writeHead(200);
     res.write(JSON.stringify(parsed, null, 2));
@@ -307,10 +311,10 @@ test('valid rsa from spec default', function(t) {
   options.method = 'POST';
   options.path = '/foo?param=value&pet=dog';
   options.headers.host = 'example.com';
-  options.headers.Date = 'Thu, 05 Jan 2012 21:31:40 GMT';
+  options.headers.Date = 'Thu, 05 Jan 2014 21:31:40 GMT';
   options.headers['content-type'] = 'application/json';
-  options.headers['content-md5'] = 'Sd/dVLAcvNLSq16eXua5uQ==';
-  options.headers['content-length'] = '18';
+  options.headers['digest'] = 'SHA-256=' + sha256sum.digest('base64');
+  options.headers['content-length'] = '' + (jsonMessage.length - 1);
   var signer = crypto.createSign('RSA-SHA256');
   signer.update('date: ' + options.headers.Date);
   options.headers.Authorization =
@@ -321,12 +325,16 @@ test('valid rsa from spec default', function(t) {
     t.equal(res.statusCode, 200);
     t.end();
   });
-  req.write('{"hello": "world"}');
+  req.write(jsonMessage);
   req.end();
 });
 
 // test values from spec for all headers
 test('valid rsa from spec all headers', function(t) {
+  var jsonMessage = '{"hello": "world"}';
+  var sha256sum = crypto.createHash('sha256');
+  sha256sum.update(jsonMessage)
+
   server.tester = function(req, res) {
     console.log('> [ALL]', req.headers.authorization);
     var parsed = httpSignature.parseRequest(req, {
@@ -335,7 +343,7 @@ test('valid rsa from spec all headers', function(t) {
     });
     t.ok(httpSignature.verify(parsed, rsaPublic));
     // check known signature
-    t.ok(req.headers.authorization === 'Signature keyId="Test",algorithm="rsa-sha256",headers="request-line host date content-type content-md5 content-length",signature="H/AaTDkJvLELy4i1RujnKlS6dm8QWiJvEpn9cKRMi49kKF+mohZ15z1r+mF+XiKS5kOOscyS83olfBtsVhYjPg2Ei3/D9D4Mvb7bFm9IaLJgYTFFuQCghrKQQFPiqJN320emjHxFowpIm1BkstnEU7lktH/XdXVBo8a6Uteiztw="');
+    t.ok(req.headers.authorization === 'Signature keyId="Test",algorithm="rsa-sha256",headers="request-line host date content-type digest content-length",signature="jgSqYK0yKclIHfF9zdApVEbDp5eqj8C4i4X76pE+XHoxugXv7qnVrGR+30bmBgtpR39I4utq17s9ghz/2QFVxlnToYAvbSVZJ9ulLd1HQBugO0jOyn9sXOtcN7uNHBjqNCqUsnt0sw/cJA6B6nJZpyNqNyAXKdxZZItOuhIs78w="');
 
     res.writeHead(200);
     res.write(JSON.stringify(parsed, null, 2));
@@ -345,27 +353,27 @@ test('valid rsa from spec all headers', function(t) {
   options.method = 'POST';
   options.path = '/foo?param=value&pet=dog';
   options.headers.host = 'example.com';
-  options.headers.Date = 'Thu, 05 Jan 2012 21:31:40 GMT';
+  options.headers.Date = 'Thu, 05 Jan 2014 21:31:40 GMT';
   options.headers['content-type'] = 'application/json';
-  options.headers['content-md5'] = 'Sd/dVLAcvNLSq16eXua5uQ==';
-  options.headers['content-length'] = '18';
+  options.headers['digest'] = 'SHA-256=' + sha256sum.digest('base64');
+  options.headers['content-length'] = '' + (jsonMessage.length - 1);
   var signer = crypto.createSign('RSA-SHA256');
   signer.update(options.method + ' ' + options.path + ' HTTP/1.1\n');
   signer.update('host: ' + options.headers.host + '\n');
   signer.update('date: ' + options.headers.Date + '\n');
   signer.update('content-type: ' + options.headers['content-type'] + '\n');
-  signer.update('content-md5: ' + options.headers['content-md5'] + '\n');
+  signer.update('digest: ' + options.headers['digest'] + '\n');
   signer.update('content-length: ' + options.headers['content-length']);
   options.headers.Authorization =
     'Signature keyId="Test",algorithm="rsa-sha256",headers=' +
-    '"request-line host date content-type content-md5 content-length"' +
+    '"request-line host date content-type digest content-length"' +
     ',signature="' + signer.sign(rsaPrivate, 'base64') + '"';
 
   var req = http.request(options, function(res) {
     t.equal(res.statusCode, 200);
     t.end();
   });
-  req.write('{"hello": "world"}');
+  req.write(jsonMessage);
   req.end();
 });
 
@@ -382,7 +390,7 @@ test('valid rsa from spec all headers (request-target)', function(t) {
     });
     t.ok(httpSignature.verify(parsed, rsaPublic));
     // check known signature
-    t.ok(req.headers.authorization === 'Signature keyId="Test",algorithm="rsa-sha256",headers="(request-target) host date content-type digest content-length",signature="U2w+wCBXdcUTpb2Xb05Cht26ogGPtZN4CEEqLJdt5cdPz+fnspZ9sp5rnimNxXUPOkRYoKKC09Q0yeZ8Bd3gLvZ3Lmd07IgpdCkjv0QITmaab3rQloQfuo7t4y9enSg2q2BhPXVRhlhiBp2irEmD8Ghz0zE9PvRpLATVeguS5i4="');
+    t.ok(req.headers.authorization === 'Signature keyId="Test",algorithm="rsa-sha256",headers="(request-target) host date content-type digest content-length",signature="Tqfe2TGMEOwrHLItN2pDnKZiV3cKDWx1dTreYvWRH/kYVT0avw975g25I0/Sig2l60CDkRKTk9ciJMkn8Eanpa7aICnRWbOu38+ozMfQrM7cc06NRSY6+UQ67dn6K4jEW0WNWxhLLwWBSXxhxuXOL3rFKYZliNCundM9FiYk5aE="');
 
     res.writeHead(200);
     res.write(JSON.stringify(parsed, null, 2));
@@ -394,7 +402,7 @@ test('valid rsa from spec all headers (request-target)', function(t) {
   options.method = 'POST';
   options.path = '/foo?param=value&pet=dog';
   options.headers.host = 'example.com';
-  options.headers.Date = 'Thu, 05 Jan 2012 21:31:40 GMT';
+  options.headers.Date = 'Thu, 05 Jan 2014 21:31:40 GMT';
   options.headers['content-type'] = 'application/json';
   options.headers['digest'] = 'SHA-256=' + sha256sum.digest('base64');
   console.log('digest', options.headers['digest']);
