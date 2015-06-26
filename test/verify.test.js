@@ -86,7 +86,7 @@ test('setup', function(t) {
 });
 
 
-test('invalid hmac (legacy)', function(t) {
+test('invalid hmac', function(t) {
   server.tester = function(req, res) {
     var parsed = httpSignature.parseRequest(req);
     t.ok(!httpSignature.verifyHMAC(parsed, hmacKey));
@@ -107,55 +107,11 @@ test('invalid hmac (legacy)', function(t) {
   });
 });
 
-test('invalid hmac (new)', function(t) {
-  server.tester = function(req, res) {
-    var parsed = httpSignature.parseRequest(req);
-    t.ok(!httpSignature.verifySignature(parsed, hmacKey));
 
-    res.writeHead(200);
-    res.write(JSON.stringify(parsed, null, 2));
-    res.end();
-  };
-
-  options.headers.Date = _rfc1123();
-  options.headers.Authorization =
-    'Signature keyId="foo",algorithm="hmac-sha1",signature="' +
-     uuid() + '"';
-
-  http.get(options, function(res) {
-    t.equal(res.statusCode, 200);
-    t.end();
-  });
-});
-
-
-test('valid hmac (legacy)', function(t) {
+test('valid hmac', function(t) {
   server.tester = function(req, res) {
     var parsed = httpSignature.parseRequest(req);
     t.ok(httpSignature.verifyHMAC(parsed, hmacKey));
-
-    res.writeHead(200);
-    res.write(JSON.stringify(parsed, null, 2));
-    res.end();
-  };
-
-  options.headers.Date = _rfc1123();
-  var hmac = crypto.createHmac('sha1', hmacKey);
-  hmac.update('date: ' + options.headers.Date);
-  options.headers.Authorization =
-    'Signature keyId="foo",algorithm="hmac-sha1",signature="' +
-    hmac.digest('base64') + '"';
-
-  http.get(options, function(res) {
-    t.equal(res.statusCode, 200);
-    t.end();
-  });
-});
-
-test('valid hmac (new)', function(t) {
-  server.tester = function(req, res) {
-    var parsed = httpSignature.parseRequest(req);
-    t.ok(httpSignature.verifySignature(parsed, hmacKey));
 
     res.writeHead(200);
     res.write(JSON.stringify(parsed, null, 2));
