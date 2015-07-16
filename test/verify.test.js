@@ -210,7 +210,6 @@ test('invalid date', function(t) {
 // test values from spec for simple test
 test('valid rsa from spec default', function(t) {
   server.tester = function(req, res) {
-    console.log('> [DEFAULT]', req.headers.authorization);
     var parsed = httpSignature.parseRequest(req, {
       // this test uses a fixed old date so ignore clock skew
       clockSkew: Number.MAX_VALUE
@@ -250,7 +249,6 @@ test('valid rsa from spec default', function(t) {
   sha256sum.update(jsonMessage)
 
   server.tester = function(req, res) {
-    console.log('> [DEFAULT]', req.headers.authorization);
     var parsed = httpSignature.parseRequest(req, {
       // this test uses a fixed old date so ignore clock skew
       clockSkew: Number.MAX_VALUE
@@ -292,7 +290,6 @@ test('valid rsa from spec all headers', function(t) {
   sha256sum.update(jsonMessage)
 
   server.tester = function(req, res) {
-    console.log('> [ALL]', req.headers.authorization);
     var parsed = httpSignature.parseRequest(req, {
       // this test uses a fixed old date so ignore clock skew
       clockSkew: Number.MAX_VALUE
@@ -339,7 +336,6 @@ test('valid rsa from spec all headers (request-target)', function(t) {
   sha256sum.update(jsonMessage);
 
   server.tester = function(req, res) {
-    console.log('> [ALL]', req.headers.authorization);
     var parsed = httpSignature.parseRequest(req, {
       // this test uses a fixed old date so ignore clock skew
       clockSkew: Number.MAX_VALUE
@@ -361,7 +357,6 @@ test('valid rsa from spec all headers (request-target)', function(t) {
   options.headers.Date = 'Thu, 05 Jan 2014 21:31:40 GMT';
   options.headers['content-type'] = 'application/json';
   options.headers['digest'] = 'SHA-256=' + sha256sum.digest('base64');
-  console.log('digest', options.headers['digest']);
   options.headers['content-length'] = '' + (jsonMessage.length - 1);
   var signer = crypto.createSign('RSA-SHA256');
 
