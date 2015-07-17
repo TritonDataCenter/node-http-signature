@@ -326,6 +326,54 @@ test('valid rsa from spec all headers', function(t) {
 });
 
 
+
+// test values from spec for all headers - draft 03
+test('valid rsa from spec all headers', function(t) {
+  server.tester = function(req, res) {
+    console.log('> [ALL]', req.headers.authorization);
+    var parsed = httpSignature.parseRequest(req, {
+      // this test uses a fixed old date so ignore clock skew
+      clockSkew: Number.MAX_VALUE,
+      draft: '03'
+    });
+console.log('parsed: ' + JSON.stringify(parsed));
+    t.ok(httpSignature.verify(parsed, rsaPublic));
+    // check expected signature
+    t.equal(req.headers.authorization, 'Signature keyId="Test",algorithm="rsa-sha256",headers="(target-request) host date content-type content-md5 content-length",signature="FH98f6FCrhDFv76s2+MIk7yB21UNA558pgBhtq0PK9V4MU6wTFRo+JtQeR6roBBm62Fk6d5wnB8Pb4Yx7fP+rToBbhfFFM5R2sLMJSB+sGT4i68c322sFKfOteUVkpgeXGrdzIoCcXUyUe7R5PtUSFIyvOvPZ21bl8zpFfY7NOE="');
+
+    res.writeHead(200);
+    res.write(JSON.stringify(parsed, null, 2));
+    res.end();
+  };
+
+  options.method = 'POST';
+  options.path = '/foo?param=value&pet=dog';
+  options.headers.host = 'example.com';
+  options.headers.Date = 'Thu, 05 Jan 2012 21:31:40 GMT';
+  options.headers['content-type'] = 'application/json';
+  options.headers['content-md5'] = 'Sd/dVLAcvNLSq16eXua5uQ==';
+  options.headers['content-length'] = '18';
+  var signer = crypto.createSign('RSA-SHA256');
+  signer.update('(target-request): ' + options.method + ' ' + options.path + '\n');
+  signer.update('host: ' + options.headers.host + '\n');
+  signer.update('date: ' + options.headers.Date + '\n');
+  signer.update('content-type: ' + options.headers['content-type'] + '\n');
+  signer.update('content-md5: ' + options.headers['content-md5'] + '\n');
+  signer.update('content-length: ' + options.headers['content-length']);
+  options.headers.Authorization =
+    'Signature keyId="Test",algorithm="rsa-sha256",headers=' +
+    '"(target-request) host date content-type content-md5 content-length"' +
+    ',signature="' + signer.sign(rsaPrivate, 'base64') + '"';
+
+  var req = http.request(options, function(res) {
+    t.equal(res.statusCode, 200);
+    t.end();
+  });
+  req.write('{"hello": "world"}');
+  req.end();
+});
+
+
 test('tear down', function(t) {
   server.on('close', function() {
     t.end();
