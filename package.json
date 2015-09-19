@@ -28,8 +28,7 @@
   },
   "dependencies": {
     "assert-plus": "^0.1.5",
-    "asn1": "0.1.11",
-    "ctype": "0.5.3"
+    "sshpk": "~1.0"
   },
   "devDependencies": {
     "node-uuid": "^1.4.1",
