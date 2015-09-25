@@ -27,7 +27,7 @@ var socket = null;
 
 test('setup', function(t) {
   rsaPrivate = fs.readFileSync(__dirname + '/rsa_private.pem', 'ascii');
-  t.ok(rsaPrivate);
+  t.ok(rsaPrivate, 'rsaPrivate');
 
   socket = '/tmp/.' + uuid();
 
@@ -59,8 +59,8 @@ test('defaults', function(t) {
   var req = http.request(httpOptions, function(res) {
     t.end();
   });
-  t.ok(httpSignature.sign(req, signOptions));
-  t.ok(req.getHeader('Authorization'));
+  t.ok(httpSignature.sign(req, signOptions), 'defaults httpSig');
+  t.ok(req.getHeader('Authorization'), 'defaults Authorization');
   console.log('> ' + req.getHeader('Authorization'));
   req.end();
 });
@@ -76,9 +76,99 @@ test('request line', function(t) {
     headers: ['date', 'request-line']
   };
 
-  t.ok(httpSignature.sign(req, opts));
-  t.ok(req.getHeader('Authorization'));
+  t.ok(httpSignature.sign(req, opts), 'request line httpSig');
+  t.ok(req.getHeader('Authorization'), 'request line Authorization');
   console.log('> ' + req.getHeader('Authorization'));
+  req.end();
+});
+
+
+test('(target-request)', function(t) {
+  var req = http.request(httpOptions, function(res) {
+    t.end();
+  });
+  var opts = {
+    keyId: 'unit',
+    key: rsaPrivate,
+    headers: ['date', '(target-request)'],
+    draft: '03'
+  };
+
+  t.ok(httpSignature.sign(req, opts),'(target-request) httpSignature');
+  t.ok(req.getHeader('Authorization'),'(target-request) Authorization');
+  console.log('> ' + req.getHeader('Authorization'));
+  req.end();
+});
+
+
+
+test('(target-request) draft 01', function(t) {
+  var req = http.request(httpOptions, function(res) {
+    t.end();
+  });
+  var opts = {
+    keyId: 'unit',
+    key: rsaPrivate,
+    headers: ['date', '(target-request)'],
+    draft: '01'
+  };
+
+  // tap.throws is broken
+  var thrown;
+  try {
+    httpSignature.sign(req, opts);
+    thrown = false;
+  } catch (e) {
+    thrown = e.message;
+  }
+  t.same(thrown, '(target-request) was not in the request', 'thrown');
+  req.end();
+});
+
+
+test('request-line draft 03', function(t) {
+  var req = http.request(httpOptions, function(res) {
+    t.end();
+  });
+  var opts = {
+    keyId: 'unit',
+    key: rsaPrivate,
+    headers: ['date', 'request-line'],
+    draft: '03'
+  };
+
+  // tap.throws is broken
+  var thrown;
+  try {
+    httpSignature.sign(req, opts);
+    thrown = false;
+  } catch (e) {
+    thrown = e.message;
+  }
+  t.same(thrown, 'request-line was not in the request', 'thrown');
+  req.end();
+});
+
+
+test('bad draft',function(t) {
+  var req = http.request(httpOptions, function(res) {
+    t.end();
+  });
+  var opts = {
+        keyId: 'unit',
+        key: rsaPrivate,
+        headers: ['date'],
+        draft: '99'
+      };
+  // tap.throws is broken
+  var thrown;
+  try {
+    httpSignature.sign(req, opts);
+    thrown = false;
+  } catch (e) {
+    thrown = e.message;
+  }
+  t.same(thrown, 'draft 99 is not supported', 'thrown');
   req.end();
 });
 
@@ -93,8 +183,8 @@ test('hmac', function(t) {
     algorithm: 'hmac-sha1'
   };
 
-  t.ok(httpSignature.sign(req, opts));
-  t.ok(req.getHeader('Authorization'));
+  t.ok(httpSignature.sign(req, opts), 'hmac httpSig');
+  t.ok(req.getHeader('Authorization'), 'hmac Authorization');
   console.log('> ' + req.getHeader('Authorization'));
   req.end();
 });
