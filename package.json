@@ -28,7 +28,11 @@
   },
   "dependencies": {
     "assert-plus": "^0.1.5",
-    "sshpk": "~1.0"
+    "jsprim": "^1.2.0",
+    "sshpk": "^1.4.0"
+  },
+  "peerDependencies": {
+    "sshpk": "^1.4.0"
   },
   "devDependencies": {
     "node-uuid": "^1.4.1",
