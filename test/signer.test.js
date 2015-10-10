@@ -3,6 +3,7 @@
 var crypto = require('crypto');
 var fs = require('fs');
 var http = require('http');
+var sshpk = require('sshpk');
 
 var test = require('tap').test;
 var uuid = require('node-uuid');
@@ -148,6 +149,92 @@ test('hmac', function(t) {
   req.end();
 });
 
+test('createSigner with RSA key', function(t) {
+  var s = httpSignature.createSigner({
+    keyId: 'foo',
+    key: rsaPrivate,
+    algorithm: 'rsa-sha1'
+  });
+  s.writeTarget('get', '/');
+  var date = s.writeDateHeader();
+  s.sign(function (err, authz) {
+    t.error(err);
+    console.log('> ' + authz);
+    var req = http.request(httpOptions, function(res) {
+      t.end();
+    });
+    req.setHeader('date', date);
+    req.setHeader('authorization', authz);
+    req.end();
+  });
+});
+
+test('createSigner with RSA key, auto algo', function(t) {
+  var s = httpSignature.createSigner({
+    keyId: 'foo',
+    key: rsaPrivate
+  });
+  s.writeTarget('get', '/');
+  var date = s.writeDateHeader();
+  s.sign(function (err, authz) {
+    t.error(err);
+    var req = http.request(httpOptions, function(res) {
+      t.end();
+    });
+    req.setHeader('date', date);
+    req.setHeader('authorization', authz);
+    req.end();
+  });
+});
+
+test('createSigner with HMAC key', function(t) {
+  var s = httpSignature.createSigner({
+    keyId: 'foo',
+    key: hmacKey,
+    algorithm: 'hmac-sha256'
+  });
+  var date = s.writeDateHeader();
+  s.writeTarget('get', '/');
+  s.writeHeader('x-some-header', 'bar');
+  s.sign(function (err, authz) {
+    t.error(err);
+    var req = http.request(httpOptions, function(res) {
+      t.end();
+    });
+    req.setHeader('date', date);
+    req.setHeader('authorization', authz);
+    req.setHeader('x-some-header', 'bar');
+    req.end();
+  });
+});
+
+test('createSigner with sign function', function(t) {
+  var date;
+  var s = httpSignature.createSigner({
+    sign: function (data, cb) {
+      t.ok(typeof (data) === 'string');
+      var m = data.match(/^date: (.+)$/);
+      t.ok(m);
+      t.strictEqual(m[1], date);
+      cb(null, {
+        keyId: 'foo',
+        algorithm: 'hmac-sha256',
+        signature: 'fakesig'
+      });
+    }
+  });
+  date = s.writeDateHeader();
+  s.sign(function (err, authz) {
+    t.error(err);
+    t.ok(authz.match(/fakesig/));
+    var req = http.request(httpOptions, function(res) {
+      t.end();
+    });
+    req.setHeader('date', date);
+    req.setHeader('authorization', authz);
+    req.end();
+  });
+});
 
 test('tear down', function(t) {
   server.on('close', function() {
