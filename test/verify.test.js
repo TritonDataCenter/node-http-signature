@@ -3,6 +3,7 @@
 var crypto = require('crypto');
 var fs = require('fs');
 var http = require('http');
+var jsprim = require('jsprim');
 
 var test = require('tap').test;
 var uuid = require('node-uuid');
@@ -19,45 +20,6 @@ var rsaPrivate = null;
 var rsaPublic = null;
 var server = null;
 var socket = null;
-
-
-
-// --- Helpers
-
-function _pad(val) {
-  if (parseInt(val, 10) < 10) {
-    val = '0' + val;
-  }
-  return val;
-}
-
-
-function _rfc1123(date) {
-  if (!date) date = new Date();
-
-  var months = ['Jan',
-                'Feb',
-                'Mar',
-                'Apr',
-                'May',
-                'Jun',
-                'Jul',
-                'Aug',
-                'Sep',
-                'Oct',
-                'Nov',
-                'Dec'];
-  var days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-  return days[date.getUTCDay()] + ', ' +
-    _pad(date.getUTCDate()) + ' ' +
-    months[date.getUTCMonth()] + ' ' +
-    date.getUTCFullYear() + ' ' +
-    _pad(date.getUTCHours()) + ':' +
-    _pad(date.getUTCMinutes()) + ':' +
-    _pad(date.getUTCSeconds()) +
-    ' GMT';
-}
-
 
 
 ///--- Tests
@@ -96,7 +58,7 @@ test('invalid hmac', function(t) {
     res.end();
   };
 
-  options.headers.Date = _rfc1123();
+  options.headers.Date = jsprim.rfc1123(new Date());
   options.headers.Authorization =
     'Signature keyId="foo",algorithm="hmac-sha1",signature="' +
      uuid() + '"';
@@ -118,7 +80,7 @@ test('valid hmac', function(t) {
     res.end();
   };
 
-  options.headers.Date = _rfc1123();
+  options.headers.Date = jsprim.rfc1123(new Date());
   var hmac = crypto.createHmac('sha1', hmacKey);
   hmac.update('date: ' + options.headers.Date);
   options.headers.Authorization =
@@ -142,7 +104,7 @@ test('invalid rsa', function(t) {
     res.end();
   };
 
-  options.headers.Date = _rfc1123();
+  options.headers.Date = jsprim.rfc1123(new Date());
   options.headers.Authorization =
     'Signature keyId="foo",algorithm="rsa-sha1",signature="' +
     uuid() + '"';
@@ -164,7 +126,7 @@ test('valid rsa', function(t) {
     res.end();
   };
 
-  options.headers.Date = _rfc1123();
+  options.headers.Date = jsprim.rfc1123(new Date());
   var signer = crypto.createSign('RSA-SHA256');
   signer.update('date: ' + options.headers.Date);
   options.headers.Authorization =

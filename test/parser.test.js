@@ -4,6 +4,7 @@ var http = require('http');
 
 var test = require('tap').test;
 var uuid = require('node-uuid');
+var jsprim = require('jsprim');
 
 var httpSignature = require('../lib/index');
 
@@ -14,45 +15,6 @@ var httpSignature = require('../lib/index');
 var options = null;
 var server = null;
 var socket = null;
-
-
-
-// --- Helpers
-
-function _pad(val) {
-  if (parseInt(val, 10) < 10) {
-    val = '0' + val;
-  }
-  return val;
-}
-
-
-function _rfc1123(date) {
-  if (!date) date = new Date();
-
-  var months = ['Jan',
-                'Feb',
-                'Mar',
-                'Apr',
-                'May',
-                'Jun',
-                'Jul',
-                'Aug',
-                'Sep',
-                'Oct',
-                'Nov',
-                'Dec'];
-  var days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-  return days[date.getUTCDay()] + ', ' +
-    _pad(date.getUTCDate()) + ' ' +
-    months[date.getUTCMonth()] + ' ' +
-    date.getUTCFullYear() + ' ' +
-    _pad(date.getUTCHours()) + ':' +
-    _pad(date.getUTCMinutes()) + ':' +
-    _pad(date.getUTCSeconds()) +
-    ' GMT';
-}
-
 
 
 ///--- Tests
@@ -341,7 +303,7 @@ test('valid default headers', function(t) {
 
   options.headers.Authorization =
     'Signature keyId="foo",algorithm="rsa-sha256",signature="aaabbbbcccc"';
-  options.headers.Date = _rfc1123();
+  options.headers.Date = jsprim.rfc1123(new Date());
   http.get(options, function(res) {
     t.equal(res.statusCode, 200);
     t.end();
@@ -365,7 +327,7 @@ test('explicit headers missing', function(t) {
   options.headers.Authorization =
     'Signature keyId="foo",algorithm="rsa-sha256",' +
     'headers="date digest",signature="aaabbbbcccc"';
-  options.headers.Date = _rfc1123();
+  options.headers.Date = jsprim.rfc1123(new Date());
   http.get(options, function(res) {
     t.equal(res.statusCode, 200);
     t.end();
@@ -386,7 +348,7 @@ test('valid explicit headers request-line', function(t) {
     'Signature keyId="fo,o",algorithm="RSA-sha256",' +
     'headers="dAtE dIgEsT request-line",' +
     'extensions="blah blah",signature="digitalSignature"';
-  options.headers.Date = _rfc1123();
+  options.headers.Date = jsprim.rfc1123(new Date());
   options.headers['digest'] = uuid();
 
   http.get(options, function(res) {
@@ -445,7 +407,7 @@ test('valid explicit headers request-line strict true', function(t) {
     'Signature keyId="fo,o",algorithm="RSA-sha256",' +
     'headers="dAtE dIgEsT request-line",' +
     'extensions="blah blah",signature="digitalSignature"';
-  options.headers.Date = _rfc1123();
+  options.headers.Date = jsprim.rfc1123(new Date());
   options.headers['digest'] = uuid();
 
   http.get(options, function(res) {
@@ -467,7 +429,7 @@ test('valid explicit headers request-target', function(t) {
     'Signature keyId="fo,o",algorithm="RSA-sha256",' +
     'headers="dAtE dIgEsT (request-target)",' +
     'extensions="blah blah",signature="digitalSignature"';
-  options.headers.Date = _rfc1123();
+  options.headers.Date = jsprim.rfc1123(new Date());
   options.headers['digest'] = uuid();
 
   http.get(options, function(res) {
@@ -531,7 +493,7 @@ test('expired', function(t) {
   options.headers.Authorization =
     'Signature keyId="f,oo",algorithm="RSA-sha256",' +
     'headers="dAtE dIgEsT",signature="digitalSignature"';
-  options.headers.Date = _rfc1123();
+  options.headers.Date = jsprim.rfc1123(new Date());
   options.headers['digest'] = uuid();
   http.get(options, function(res) {
     t.equal(res.statusCode, 200);
@@ -561,7 +523,7 @@ test('missing required header', function(t) {
   options.headers.Authorization =
     'Signature keyId="f,oo",algorithm="RSA-sha256",' +
     'headers="dAtE cOntEnt-MD5",signature="digitalSignature"';
-  options.headers.Date = _rfc1123();
+  options.headers.Date = jsprim.rfc1123(new Date());
   options.headers['content-md5'] = uuid();
   http.get(options, function(res) {
     t.equal(res.statusCode, 200);
@@ -591,7 +553,7 @@ test('not whitelisted algorithm', function(t) {
   options.headers.Authorization =
     'Signature keyId="f,oo",algorithm="RSA-sha256",' +
     'headers="dAtE dIgEsT",signature="digitalSignature"';
-  options.headers.Date = _rfc1123();
+  options.headers.Date = jsprim.rfc1123(new Date());
   options.headers['digest'] = uuid();
   http.get(options, function(res) {
     t.equal(res.statusCode, 200);
