@@ -4,6 +4,7 @@ var crypto = require('crypto');
 var fs = require('fs');
 var http = require('http');
 var jsprim = require('jsprim');
+var sshpk = require('sshpk');
 
 var test = require('tap').test;
 var uuid = require('node-uuid');
@@ -18,6 +19,10 @@ var hmacKey = null;
 var options = null;
 var rsaPrivate = null;
 var rsaPublic = null;
+var dsaPrivate = null;
+var dsaPublic = null;
+var ecdsaPrivate = null;
+var ecdsaPublic = null;
 var server = null;
 var socket = null;
 
@@ -26,9 +31,18 @@ var socket = null;
 
 test('setup', function(t) {
   rsaPrivate = fs.readFileSync(__dirname + '/rsa_private.pem', 'ascii');
-  rsaPublic = fs.readFileSync(__dirname + '/rsa_public.pem', 'ascii');
+  dsaPrivate = fs.readFileSync(__dirname + '/dsa_private.pem', 'ascii');
+  ecdsaPrivate = fs.readFileSync(__dirname + '/ecdsa_private.pem', 'ascii');
   t.ok(rsaPrivate);
+  t.ok(dsaPrivate);
+  t.ok(ecdsaPrivate);
+
+  rsaPublic = fs.readFileSync(__dirname + '/rsa_public.pem', 'ascii');
+  dsaPublic = fs.readFileSync(__dirname + '/dsa_public.pem', 'ascii');
+  ecdsaPublic = fs.readFileSync(__dirname + '/ecdsa_public.pem', 'ascii');
   t.ok(rsaPublic);
+  t.ok(dsaPublic);
+  t.ok(ecdsaPublic);
 
   hmacKey = uuid();
   socket = '/tmp/.' + uuid();
@@ -132,6 +146,98 @@ test('valid rsa', function(t) {
   options.headers.Authorization =
     'Signature keyId="foo",algorithm="rsa-sha256",signature="' +
     signer.sign(rsaPrivate, 'base64') + '"';
+
+  http.get(options, function(res) {
+    t.equal(res.statusCode, 200);
+    t.end();
+  });
+});
+
+test('invalid dsa', function(t) {
+  server.tester = function(req, res) {
+    var parsed = httpSignature.parseRequest(req);
+    t.ok(!httpSignature.verify(parsed, dsaPublic));
+
+    res.writeHead(200);
+    res.write(JSON.stringify(parsed, null, 2));
+    res.end();
+  };
+
+  options.headers.Date = jsprim.rfc1123(new Date());
+  options.headers.Authorization =
+    'Signature keyId="foo",algorithm="dsa-sha1",signature="' +
+    uuid() + '"';
+
+  http.get(options, function(res) {
+    t.equal(res.statusCode, 200);
+    t.end();
+  });
+});
+
+
+test('valid dsa', function(t) {
+  server.tester = function(req, res) {
+    var parsed = httpSignature.parseRequest(req);
+    t.ok(httpSignature.verify(parsed, dsaPublic));
+
+    res.writeHead(200);
+    res.write(JSON.stringify(parsed, null, 2));
+    res.end();
+  };
+
+  options.headers.Date = jsprim.rfc1123(new Date());
+  var key = sshpk.parsePrivateKey(dsaPrivate);
+  var signer = key.createSign('sha256');
+  signer.update('date: ' + options.headers.Date);
+  options.headers.Authorization =
+    'Signature keyId="foo",algorithm="dsa-sha256",signature="' +
+    signer.sign().toString() + '"';
+
+  http.get(options, function(res) {
+    t.equal(res.statusCode, 200);
+    t.end();
+  });
+});
+
+test('invalid ecdsa', function(t) {
+  server.tester = function(req, res) {
+    var parsed = httpSignature.parseRequest(req);
+    t.ok(!httpSignature.verify(parsed, ecdsaPublic));
+
+    res.writeHead(200);
+    res.write(JSON.stringify(parsed, null, 2));
+    res.end();
+  };
+
+  options.headers.Date = jsprim.rfc1123(new Date());
+  options.headers.Authorization =
+    'Signature keyId="foo",algorithm="ecdsa-sha256",signature="' +
+    uuid() + '"';
+
+  http.get(options, function(res) {
+    t.equal(res.statusCode, 200);
+    t.end();
+  });
+});
+
+
+test('valid ecdsa', function(t) {
+  server.tester = function(req, res) {
+    var parsed = httpSignature.parseRequest(req);
+    t.ok(httpSignature.verify(parsed, ecdsaPublic));
+
+    res.writeHead(200);
+    res.write(JSON.stringify(parsed, null, 2));
+    res.end();
+  };
+
+  options.headers.Date = jsprim.rfc1123(new Date());
+  var key = sshpk.parsePrivateKey(ecdsaPrivate);
+  var signer = key.createSign('sha512');
+  signer.update('date: ' + options.headers.Date);
+  options.headers.Authorization =
+    'Signature keyId="foo",algorithm="ecdsa-sha512",signature="' +
+    signer.sign().toString() + '"';
 
   http.get(options, function(res) {
     t.equal(res.statusCode, 200);

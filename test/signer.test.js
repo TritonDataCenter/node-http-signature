@@ -17,6 +17,8 @@ var httpSignature = require('../lib/index');
 var hmacKey = null;
 var httpOptions = null;
 var rsaPrivate = null;
+var dsaPrivate = null;
+var ecdsaPrivate = null;
 var signOptions = null;
 var server = null;
 var socket = null;
@@ -28,7 +30,11 @@ var socket = null;
 
 test('setup', function(t) {
   rsaPrivate = fs.readFileSync(__dirname + '/rsa_private.pem', 'ascii');
+  dsaPrivate = fs.readFileSync(__dirname + '/dsa_private.pem', 'ascii');
+  ecdsaPrivate = fs.readFileSync(__dirname + '/ecdsa_private.pem', 'ascii');
   t.ok(rsaPrivate);
+  t.ok(dsaPrivate);
+  t.ok(ecdsaPrivate);
 
   socket = '/tmp/.' + uuid();
 
@@ -124,6 +130,38 @@ test('request target', function(t) {
   var opts = {
     keyId: 'unit',
     key: rsaPrivate,
+    headers: ['date', '(request-target)']
+  };
+
+  t.ok(httpSignature.sign(req, opts));
+  t.ok(req.getHeader('Authorization'));
+  console.log('> ' + req.getHeader('Authorization'));
+  req.end();
+});
+
+test('request-target with dsa key', function(t) {
+  var req = http.request(httpOptions, function(res) {
+    t.end();
+  });
+  var opts = {
+    keyId: 'unit',
+    key: dsaPrivate,
+    headers: ['date', '(request-target)']
+  };
+
+  t.ok(httpSignature.sign(req, opts));
+  t.ok(req.getHeader('Authorization'));
+  console.log('> ' + req.getHeader('Authorization'));
+  req.end();
+});
+
+test('request-target with ecdsa key', function(t) {
+  var req = http.request(httpOptions, function(res) {
+    t.end();
+  });
+  var opts = {
+    keyId: 'unit',
+    key: ecdsaPrivate,
     headers: ['date', '(request-target)']
   };
 
