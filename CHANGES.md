@@ -1,6 +1,6 @@
 # node-http-signature changelog
 
-## 1.0.0 (not yet released)
+## 1.0.0
 
 - First semver release.
 - #36: Ensure verifySignature does not leak useful timing information
