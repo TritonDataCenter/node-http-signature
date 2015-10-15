@@ -1,5 +1,10 @@
 # node-http-signature changelog
 
+## 1.0.1
+
+- Bump minimum version of `sshpk` dependency, to include fixes for
+  whitespace tolerance in key parsing.
+
 ## 1.0.0
 
 - First semver release.
