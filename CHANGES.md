@@ -1,5 +1,10 @@
 # node-http-signature changelog
 
+## 1.0.2
+
+- Bump min version of `jsprim` dependency, to include fixes for using
+  http-signature with `browserify`
+
 ## 1.0.1
 
 - Bump minimum version of `sshpk` dependency, to include fixes for
