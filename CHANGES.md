@@ -1,5 +1,11 @@
 # node-http-signature changelog
 
+## 1.1.0
+
+- Bump version of `sshpk` dependency, remove peerDependency on it since
+  it now supports exchanging objects between multiple versions of itself
+  where possible
+
 ## 1.0.2
 
 - Bump min version of `jsprim` dependency, to include fixes for using
