@@ -32,9 +32,6 @@
     "jsprim": "^1.2.2",
     "sshpk": "^1.4.6"
   },
-  "peerDependencies": {
-    "sshpk": "^1.4.6"
-  },
   "devDependencies": {
     "node-uuid": "^1.4.1",
     "tap": "0.4.2"
