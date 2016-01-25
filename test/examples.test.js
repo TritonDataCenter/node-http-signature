@@ -193,11 +193,15 @@ if (binding && HTTPParser && kOnHeadersComplete) {
 		opts.key = privKey;
 
 		delete (httpReq.headers['authorization']);
+		httpReq._stringToSign = null;
 		t.ok(httpSignature.signRequest(httpReq, opts));
 
 		var authz = 'Authorization: ' +
 		    httpReq.headers['authorization'];
 		t.strictEqual(config.authz, authz);
+
+		t.strictEqual(typeof (httpReq._stringToSign), 'string');
+		t.strictEqual(config.signString, httpReq._stringToSign);
 
 		t.end();
 	}

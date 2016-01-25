@@ -66,9 +66,19 @@ test('defaults', function(t) {
   var req = http.request(httpOptions, function(res) {
     t.end();
   });
+  req._stringToSign = null;
   t.ok(httpSignature.sign(req, signOptions));
-  t.ok(req.getHeader('Authorization'));
-  console.log('> ' + req.getHeader('Authorization'));
+  var authz = req.getHeader('Authorization');
+  t.ok(authz);
+
+  t.strictEqual(typeof (req._stringToSign), 'string');
+  t.ok(req._stringToSign.match(/^date: [^\n]*$/));
+
+  var key = sshpk.parsePrivateKey(rsaPrivate);
+  var sig = key.createSign().update(req._stringToSign).sign();
+  t.ok(authz.indexOf(sig.toString()) !== -1);
+
+  console.log('> ' + authz);
   req.end();
 });
 
@@ -83,8 +93,12 @@ test('request line strict unspecified', function(t) {
     headers: ['date', 'request-line']
   };
 
+  req._stringToSign = null;
   t.ok(httpSignature.sign(req, opts));
   t.ok(req.getHeader('Authorization'));
+  t.strictEqual(typeof (req._stringToSign), 'string');
+  t.ok(req._stringToSign.match(/^date: [^\n]*\nGET \/ HTTP\/1.1$/));
+
   console.log('> ' + req.getHeader('Authorization'));
   req.end();
 });
@@ -102,6 +116,8 @@ test('request line strict false', function(t) {
 
   t.ok(httpSignature.sign(req, opts));
   t.ok(req.getHeader('Authorization'));
+  t.ok(!req.hasOwnProperty('_stringToSign'));
+  t.ok(req._stringToSign === undefined);
   console.log('> ' + req.getHeader('Authorization'));
   req.end();
 });
@@ -133,8 +149,11 @@ test('request target', function(t) {
     headers: ['date', '(request-target)']
   };
 
+  req._stringToSign = null;
   t.ok(httpSignature.sign(req, opts));
   t.ok(req.getHeader('Authorization'));
+  t.strictEqual(typeof (req._stringToSign), 'string');
+  t.ok(req._stringToSign.match(/^date: [^\n]*\n\(request-target\): get \/$/));
   console.log('> ' + req.getHeader('Authorization'));
   req.end();
 });
