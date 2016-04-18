@@ -3,7 +3,7 @@
 var http = require('http');
 
 var test = require('tap').test;
-var uuid = require('node-uuid');
+var uuid = require('uuid');
 var jsprim = require('jsprim');
 
 var httpSignature = require('../lib/index');

@@ -33,7 +33,7 @@
     "sshpk": "^1.7.0"
   },
   "devDependencies": {
-    "node-uuid": "^1.4.1",
-    "tap": "0.4.2"
+    "tap": "0.4.2",
+    "uuid": "^2.0.2"
   }
 }

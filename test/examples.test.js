@@ -7,7 +7,7 @@ var sshpk = require('sshpk');
 var assert = require('assert-plus');
 
 var test = require('tap').test;
-var uuid = require('node-uuid');
+var uuid = require('uuid');
 
 var httpSignature = require('../lib/index');
 
