@@ -206,6 +206,54 @@ test('hmac', function(t) {
   req.end();
 });
 
+test('request with sign function', function(t) {
+  var req = http.request(httpOptions, function(res) {
+    t.end();
+  });
+  req._stringToSign = null;
+  var options = {
+    keyId: 'unitTest',
+    algorithm: 'rsa-sha256',
+    sign: function(data, options, callback) {
+      var key = sshpk.parsePrivateKey(rsaPrivate);
+      var sig = key.createSign().update(data).sign();
+      callback(null, sig);
+    }
+  };
+  httpSignature.sign(req, options, function(err) {
+    t.equal(err, null);
+    var authz = req.getHeader('Authorization');
+    t.ok(authz);
+    t.strictEqual(typeof (req._stringToSign), 'string');
+    t.ok(req._stringToSign.match(/^date: [^\n]*$/));
+    var key = sshpk.parsePrivateKey(rsaPrivate);
+    var sig = key.createSign().update(req._stringToSign).sign();
+    t.ok(authz.indexOf(sig.toString()) !== -1);
+    t.ok(authz.match(/algorithm="rsa-sha256"/));
+    console.log('> ' + authz);
+    req.end();
+  });
+});
+
+test('request with sign function, bad param', function(t) {
+  var req = http.request(httpOptions, function(res) {
+    t.end();
+  });
+  req._stringToSign = null;
+  var options = {
+    keyId: 'unitTest',
+    sign: function(data, options, callback) {
+      var key = sshpk.parsePrivateKey(rsaPrivate);
+      var sig = key.createSign().update(data).sign();
+      callback(null, sig);
+    }
+  };
+  httpSignature.sign(req, options, function(err) {
+    t.ok((err instanceof TypeError));
+    req.end();
+  });
+});
+
 test('createSigner with RSA key', function(t) {
   var s = httpSignature.createSigner({
     keyId: 'foo',
