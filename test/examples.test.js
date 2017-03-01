@@ -126,7 +126,7 @@ test('find keys and examples', function (t) {
  * interface has been pretty stable in practice, with minimal change from
  * 0.8 through to 4.2.
  */
-var binding, HTTPParser, kOnHeadersComplete;
+var binding, HTTPParser, kOnHeadersComplete, methods;
 
 if (process.binding)
 	binding = process.binding('http_parser');
@@ -134,6 +134,10 @@ if (binding)
 	HTTPParser = binding.HTTPParser;
 if (HTTPParser)
 	kOnHeadersComplete = HTTPParser.kOnHeadersComplete;
+if (HTTPParser && HTTPParser.methods)
+	methods = HTTPParser.methods;
+else
+	methods = ['DELETE', 'GET', 'HEAD', 'POST', 'PUT'];
 
 function DummyRequest() {
 }
@@ -148,22 +152,37 @@ function parseHttpRequest(data, cb) {
 	var obj = new DummyRequest();
 	p[kOnHeadersComplete] = onHeadersComplete;
 	function onHeadersComplete(opts) {
-		obj.httpVersionMajor = opts.versionMajor;
-		obj.httpVersionMinor = opts.versionMinor;
-		obj.httpVersion = opts.versionMajor + '.' + opts.versionMinor;
+		var versionMajorKey = 'versionMajor';
+		var versionMinorKey = 'versionMinor';
+		var headersKey = 'headers';
+		var urlKey = 'url';
+		var methodKey = 'method';
+		var upgradeKey = 'upgrade';
+		if (!(typeof opts === 'object')) {
+			opts = [].slice.call(arguments);
+			versionMajorKey = 0;
+			versionMinorKey = "1";
+			headersKey = "2";
+			urlKey = "4";
+			methodKey = "3";
+			upgradeKey = "7";
+		} 
+		obj.httpVersionMajor = opts[versionMajorKey];
+		obj.httpVersionMinor = opts[versionMinorKey];
+		obj.httpVersion = obj.httpVersionMajor + '.' + obj.httpVersionMinor;
 
-		obj.rawHeaders = opts.headers;
+		obj.rawHeaders = opts[headersKey];
 		obj.headers = {};
-		for (var i = 0; i < opts.headers.length; i += 2) {
-			var k = opts.headers[i].toLowerCase();
-			var v = opts.headers[i+1];
+		for (var i = 0; i < obj.rawHeaders.length; i += 2) {
+			var k = obj.rawHeaders[i].toLowerCase();
+			var v = obj.rawHeaders[i+1];
 			obj.headers[k] = v;
 		}
 
-		obj.url = opts.url;
-		obj.path = opts.url;
-		obj.method = HTTPParser.methods[opts.method];
-		obj.upgrade = opts.upgrade;
+		obj.url = opts[urlKey];
+		obj.path = opts[urlKey];
+		obj.method = methods[opts[methodKey]];
+		obj.upgrade = opts[upgradeKey];
 
 		assert.ok(obj.httpVersion);
 		cb(obj);
