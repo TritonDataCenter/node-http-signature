@@ -28,7 +28,7 @@
     "test": "tap test/*.js"
   },
   "dependencies": {
-    "assert-plus": "^0.2.0",
+    "assert-plus": "^1.0.0",
     "jsprim": "^1.2.2",
     "sshpk": "^1.7.0"
   },
