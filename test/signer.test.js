@@ -67,6 +67,27 @@ test('defaults', function(t) {
     t.end();
   });
   req._stringToSign = null;
+  t.ok(httpSignature.sign(req, Object.assign({}, signOptions, { authorizationHeaderName: 'x-auth' })));
+  var authz = req.getHeader('x-auths');
+  t.ok(authz);
+
+  t.strictEqual(typeof (req._stringToSign), 'string');
+  t.ok(req._stringToSign.match(/^date: [^\n]*$/));
+
+  var key = sshpk.parsePrivateKey(rsaPrivate);
+  var sig = key.createSign().update(req._stringToSign).sign();
+  t.ok(authz.indexOf(sig.toString()) !== -1);
+
+  console.log('> ' + authz);
+  req.end();
+});
+
+
+test('with custom authorizationHeaderName', function(t) {
+  var req = http.request(httpOptions, function(res) {
+    t.end();
+  });
+  req._stringToSign = null;
   t.ok(httpSignature.sign(req, signOptions));
   var authz = req.getHeader('Authorization');
   t.ok(authz);
