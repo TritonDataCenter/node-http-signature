@@ -311,6 +311,28 @@ test('valid default headers', function(t) {
 });
 
 
+test('valid custom authorizationHeaderName', function(t) {
+  server.tester = function(req, res) {
+    try {
+      httpSignature.parseRequest(req, { authorizationHeaderName: 'x-auth' });
+    } catch (e) {
+      t.fail(e.stack);
+    }
+
+    res.writeHead(200);
+    res.end();
+  };
+
+  options.headers['x-auth'] =
+    'Signature keyId="foo",algorithm="rsa-sha256",signature="aaabbbbcccc"';
+  options.headers.Date = jsprim.rfc1123(new Date());
+  http.get(options, function(res) {
+    t.equal(res.statusCode, 200);
+    t.end();
+  });
+});
+
+
 test('explicit headers missing', function(t) {
   server.tester = function(req, res) {
     try {
