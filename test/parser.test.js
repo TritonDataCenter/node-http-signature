@@ -583,6 +583,35 @@ test('valid mixed case headers', function(t) {
 });
 
 
+test('valid mixed case headers', function(t) {
+  server.tester = function(req, res) {
+    var options = {
+	  clockSkew: 1,
+	  headers: ['Date', 'Content-MD5']
+	};
+	
+    try {
+      httpSignature.parseRequest(req, options);
+    } catch (e) {
+      t.fail(e.stack);
+    }
+
+    res.writeHead(200);
+	res.end();
+  };
+  
+  options.headers.Authorization =
+    'Signature keyId="f,oo",algorithm="RSA-sha256",' +
+    'headers="dAtE cOntEnt-MD5",signature="digitalSignature"';
+  options.headers.Date = _rfc1123();
+  options.headers['content-md5'] = uuid();
+  http.get(options, function(res) {
+    t.equal(res.statusCode, 200);
+    t.end();
+  });
+});
+
+
 test('not whitelisted algorithm', function(t) {
   server.tester = function(req, res) {
     var options = {
