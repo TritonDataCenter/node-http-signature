@@ -24,6 +24,7 @@ var options = {
   port: 8443,
   path: '/',
   method: 'GET',
+  authorizationHeaderName: 'Authorization', //Or use Signature or signature scheme
   headers: {}
 };
 
