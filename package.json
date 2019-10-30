@@ -30,7 +30,7 @@
   "dependencies": {
     "assert-plus": "^1.0.0",
     "jsprim": "^1.2.2",
-    "sshpk": "^1.7.0"
+    "sshpk": "^1.14.1"
   },
   "devDependencies": {
     "tap": "0.4.2",
