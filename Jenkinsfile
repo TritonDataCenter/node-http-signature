@@ -35,7 +35,7 @@ pipeline {
 
                 stage('v4-zone64') {
                     agent {
-                        label joyCommonLabels(image_ver: '18.4.0')
+                        label joyCommonLabels(image_ver: '15.4.1')
                     }
                     tools {
                         nodejs 'sdcnode-v4-zone64'
