@@ -29,18 +29,18 @@ test: all
 .PHONY: check-version
 check-version:
 	@echo version is: $(shell cat package.json | json version)
-	[[ `cat package.json | json version` == `grep '^## ' CHANGES.md | head -2 | tail -1 | awk '{print $$2}'` ]]
+	[ "`cat package.json | json version`" = "`grep '^## ' CHANGES.md | head -2 | tail -1 | awk '{print $$2}'`" ]
 
 check: check-version
 
 .PHONY: cutarelease
 cutarelease: $(COMPLETION_FILE) check-version
-	[[ -z `git status --short` ]]  # If this fails, the working dir is dirty.
+	[ -z "`git status --short`" ]  # If this fails, the working dir is dirty.
 	@which json 2>/dev/null 1>/dev/null && \
 	    ver=$(shell json -f package.json version) && \
 	    name=$(shell json -f package.json name) && \
 	    publishedVer=$(shell npm view -j $(shell json -f package.json name)@$(shell json -f package.json version) version 2>/dev/null) && \
-	    if [[ -n "$$publishedVer" ]]; then \
+	    if [ -n "$$publishedVer" ]; then \
 		echo "error: $$name@$$ver is already published to npm"; \
 		exit 1; \
 	    fi && \
