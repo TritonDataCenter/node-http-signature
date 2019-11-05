@@ -2,10 +2,16 @@
 
 ## Not Yet Released
 
+## 1.3.1
+
+- Fix node 0.10 usage (#90)
+
 ## 1.3.0
 
+**Known issue:** This release broken http-signature with node 0.10.
+
 - Bump dependency `sshpk`
-- Add `Signature` header support
+- Add `Signature` header support (#83)
 
 ## 1.2.0
 
