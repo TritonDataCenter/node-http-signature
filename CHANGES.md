@@ -1,5 +1,24 @@
 # node-http-signature changelog
 
+## Not Yet Released
+
+## 1.3.1
+
+- Fix node 0.10 usage (#90)
+
+## 1.3.0
+
+**Known issue:** This release broken http-signature with node 0.10.
+
+- Bump dependency `sshpk`
+- Add `Signature` header support (#83)
+
+## 1.2.0
+
+- Bump dependency `assert-plus`
+- Add ability to pass a custom header name
+- Replaced dependency `node-uuid` with `uuid`
+
 ## 1.1.1
 
 - Version of dependency `assert-plus` updated: old version was missing
