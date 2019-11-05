@@ -23,6 +23,9 @@
     "node": ">=0.10"
   },
   "main": "lib/index.js",
+  "files": [
+    "lib"
+  ],
   "scripts": {
     "test": "tap test/*.js"
   },
