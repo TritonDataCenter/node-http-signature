@@ -1,6 +1,8 @@
 # node-http-signature changelog
 
-## Not Yet Released
+## not yet released
+
+(nothing yet)
 
 ## 1.3.1
 
