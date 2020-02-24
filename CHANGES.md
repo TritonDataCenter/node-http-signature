@@ -4,6 +4,10 @@
 
 (nothing yet)
 
+## 1.3.2
+
+- Allow Buffers to be used for verifyHMAC (#98)
+
 ## 1.3.1
 
 - Fix node 0.10 usage (#90)
