@@ -180,6 +180,67 @@ test('request target', function(t) {
   req.end();
 });
 
+test('keyid', function(t) {
+  var req = http.request(httpOptions, function(res) {
+    t.end();
+  });
+  var opts = {
+    keyId: 'unit',
+    key: rsaPrivate,
+    headers: ['date', '(keyid)']
+  };
+
+  req._stringToSign = null;
+  t.ok(httpSignature.sign(req, opts));
+  t.ok(req.getHeader('Authorization'));
+  t.strictEqual(typeof (req._stringToSign), 'string');
+  t.ok(req._stringToSign.match(/^date: [^\n]*\n\(keyid\): unit$/));
+  console.log('> ' + req.getHeader('Authorization'));
+  req.end();
+});
+
+test('signing algorithm', function(t) {
+  var req = http.request(httpOptions, function(res) {
+    t.end();
+  });
+  var opts = {
+    algorithm: 'rsa-sha256',
+    keyId: 'unit',
+    key: rsaPrivate,
+    headers: ['date', '(algorithm)']
+  };
+
+  req._stringToSign = null;
+  t.ok(httpSignature.sign(req, opts));
+  t.ok(req.getHeader('Authorization'));
+  t.strictEqual(typeof (opts.algorithm), 'string');
+  t.strictEqual(opts.algorithm, 'rsa-sha256');
+  t.strictEqual(typeof (req._stringToSign), 'string');
+  t.ok(req._stringToSign.match(/^date: [^\n]*\n\(algorithm\): [^\n]*$/));
+  console.log('> ' + req.getHeader('Authorization'));
+  req.end();
+});
+
+test('signing with unspecified algorithm', function(t) {
+  var req = http.request(httpOptions, function(res) {
+    t.end();
+  });
+  var opts = {
+    keyId: 'unit',
+    key: rsaPrivate,
+    headers: ['date', '(algorithm)']
+  };
+
+  req._stringToSign = null;
+  t.ok(httpSignature.sign(req, opts));
+  t.ok(req.getHeader('Authorization'));
+  t.strictEqual(typeof (opts.algorithm), 'string');
+  t.strictEqual(typeof (req._stringToSign), 'string');
+  t.ok(req._stringToSign.match(/^date: [^\n]*\n\(algorithm\): [^\n]*$/));
+  console.log('> ' + req.getHeader('Authorization'));
+  req.end();
+});
+
 test('request-target with dsa key', function(t) {
   var req = http.request(httpOptions, function(res) {
     t.end();
