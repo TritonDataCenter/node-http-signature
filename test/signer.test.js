@@ -241,6 +241,27 @@ test('signing with unspecified algorithm', function(t) {
   req.end();
 });
 
+test('signing opaque param', function(t) {
+  var req = http.request(httpOptions, function(res) {
+    t.end();
+  });
+  var opts = {
+    keyId: 'unit',
+    key: rsaPrivate,
+    opaque: 'opaque',
+    headers: ['date', '(opaque)']
+  };
+
+  req._stringToSign = null;
+  t.ok(httpSignature.sign(req, opts));
+  t.ok(req.getHeader('Authorization'));
+  t.strictEqual(typeof (opts.algorithm), 'string');
+  t.strictEqual(typeof (req._stringToSign), 'string');
+  t.ok(req._stringToSign.match(/^date: [^\n]*\n\(opaque\): opaque$/));
+  console.log('> ' + req.getHeader('Authorization'));
+  req.end();
+});
+
 test('request-target with dsa key', function(t) {
   var req = http.request(httpOptions, function(res) {
     t.end();
