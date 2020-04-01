@@ -4,6 +4,11 @@
 
 (nothing yet)
 
+## 1.3.3
+
+ - Add support for an opaque param in the Authorization header (#101)
+ - Add support for adding the keyId and algorithm params into the signing string (#100)
+
 ## 1.3.2
 
 - Allow Buffers to be used for verifyHMAC (#98)
