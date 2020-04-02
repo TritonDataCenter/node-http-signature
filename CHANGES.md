@@ -4,7 +4,14 @@
 
 (nothing yet)
 
+## 1.3.4
+
+- Fix breakage in v1.3.3 with the setting of the "algorithm" field in the
+  Authorization header (#102)
+
 ## 1.3.3
+
+**Bad release. Use 1.3.4.**
 
  - Add support for an opaque param in the Authorization header (#101)
  - Add support for adding the keyId and algorithm params into the signing string (#100)
