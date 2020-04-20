@@ -288,6 +288,233 @@ test('no date header', function(t) {
   });
 });
 
+test('valid numeric parameter', function(t) {
+  server.tester = function(req, res) {
+    var options = {
+      headers: ['(created)', 'digest']
+    };
+
+    try {
+      httpSignature.parseRequest(req, options);
+    } catch (e) {
+      t.fail(e.stack);
+    }
+
+    res.writeHead(200);
+    res.end();
+  };
+
+  options.headers.Authorization =
+    'Signature keyId="f,oo",algorithm="RSA-sha256",' +
+    'created=123456,' +
+    'headers="(created) dIgEsT",signature="digitalSignature"';
+  options.headers['digest'] = uuid();
+  http.get(options, function(res) {
+    t.equal(res.statusCode, 200);
+    t.end();
+  });
+});
+
+test('invalid numeric parameter', function(t) {
+  server.tester = function(req, res) {
+    var options = {
+      headers: ['(created)', 'digest']
+    };
+
+    try {
+      httpSignature.parseRequest(req, options);
+    } catch (e) {
+      t.equal(e.name, 'InvalidHeaderError');
+      t.equal(e.message, 'bad param format');
+      res.writeHead(200);
+      res.end();
+      return;
+    }
+    
+    t.fail("should throw error");
+    res.writeHead(200);
+    res.end();
+  };
+
+  options.headers.Authorization =
+    'Signature keyId="f,oo",algorithm="RSA-sha256",' +
+    'created=123@456,' +
+    'headers="(created) dIgEsT",signature="digitalSignature"';
+  options.headers['digest'] = uuid();
+  http.get(options, function(res) {
+    t.equal(res.statusCode, 200);
+    t.end();
+  });
+});
+
+test('invalid numeric parameter - decimal', function(t) {
+  server.tester = function(req, res) {
+    var options = {
+      headers: ['(created)', 'digest']
+    };
+
+    try {
+      httpSignature.parseRequest(req, options);
+    } catch (e) {
+      t.equal(e.name, 'InvalidHeaderError');
+      t.equal(e.message, 'bad param format');
+      res.writeHead(200);
+      res.end();
+      return;
+    }
+    
+    t.fail("should throw error");
+    res.writeHead(200);
+    res.end();
+  };
+
+  options.headers.Authorization =
+    'Signature keyId="f,oo",algorithm="RSA-sha256",' +
+    'created=123.456,' +
+    'headers="(created) dIgEsT",signature="digitalSignature"';
+  options.headers['digest'] = uuid();
+  http.get(options, function(res) {
+    t.equal(res.statusCode, 200);
+    t.end();
+  });
+});
+
+test('invalid numeric parameter - signed integer', function(t) {
+  server.tester = function(req, res) {
+    var options = {
+      headers: ['(created)', 'digest']
+    };
+
+    try {
+      httpSignature.parseRequest(req, options);
+    } catch (e) {
+      t.equal(e.name, 'InvalidHeaderError');
+      t.equal(e.message, 'bad param format');
+      res.writeHead(200);
+      res.end();
+      return;
+    }
+    
+    t.fail("should throw error");
+    res.writeHead(200);
+    res.end();
+  };
+
+  options.headers.Authorization =
+    'Signature keyId="f,oo",algorithm="RSA-sha256",' +
+    'created=-123456,' +
+    'headers="(created) dIgEsT",signature="digitalSignature"';
+  options.headers['digest'] = uuid();
+  http.get(options, function(res) {
+    t.equal(res.statusCode, 200);
+    t.end();
+  });
+});
+
+test('created in future', function(t) {
+  var skew = 1000;
+  server.tester = function(req, res) {
+    var options = {
+      headers: ['(created)', 'digest'],
+      clockSkew: skew
+    };
+
+    try {
+      httpSignature.parseRequest(req, options);
+    } catch (e) {
+      t.equal(e.name, 'ExpiredRequestError');
+      t.similar(e.message, new RegExp('Created lies in the future.*'));
+      res.writeHead(200);
+      res.end();
+      return;
+    }
+    
+    t.fail("should throw error");
+    res.writeHead(200);
+    res.end();
+  };
+
+  var created = Math.floor(Date.now() / 1000) + skew + 10;
+  options.headers.Authorization =
+    'Signature keyId="f,oo",algorithm="RSA-sha256",' +
+    'created=' + created + ',' +
+    'headers="(created) dIgEsT",signature="digitalSignature"';
+  options.headers['digest'] = uuid();
+  http.get(options, function(res) {
+    t.equal(res.statusCode, 200);
+    t.end();
+  });
+});
+
+test('expires expired', function(t) {
+  var skew = 1000;
+  server.tester = function(req, res) {
+    var options = {
+      headers: ['(expires)', 'digest'],
+      clockSkew: skew
+    };
+
+    try {
+      httpSignature.parseRequest(req, options);
+    } catch (e) {
+      t.equal(e.name, 'ExpiredRequestError');
+      t.similar(e.message, new RegExp('Request expired.*'));
+      res.writeHead(200);
+      res.end();
+      return;
+    }
+    
+    t.fail("should throw error");
+    res.writeHead(200);
+    res.end();
+  };
+
+  var expires = Math.floor(Date.now() / 1000) - skew - 1;
+  options.headers.Authorization =
+    'Signature keyId="f,oo",algorithm="RSA-sha256",' +
+    'expires=' + expires + ',' +
+    'headers="(expires) dIgEsT",signature="digitalSignature"';
+  options.headers['digest'] = uuid();
+  http.get(options, function(res) {
+    t.equal(res.statusCode, 200);
+    t.end();
+  });
+});
+
+test('valid created and expires with skew', function(t) {
+  var skew = 1000;
+  server.tester = function(req, res) {
+    var options = {
+      headers: ['(created)', '(expires)', 'digest'],
+      clockSkew: skew
+    };
+
+    try {
+      httpSignature.parseRequest(req, options);
+    } catch (e) {
+      t.fail(e.stack);
+    }
+    
+    res.writeHead(200);
+    res.end();
+  };
+
+  //created is in the future but within allowed skew
+  var created = Math.floor(Date.now() / 1000) + skew - 1;
+  //expires is in the past but within allowed skew
+  var expires = Math.floor(Date.now() / 1000) - skew + 10;
+  options.headers.Authorization =
+    'Signature keyId="f,oo",algorithm="RSA-sha256",' +
+    'created=' + created + ',' + 'expires=' + expires + ',' +
+    'headers="(created) (expires) dIgEsT",signature="digitalSignature"';
+  options.headers['digest'] = uuid();
+  http.get(options, function(res) {
+    t.equal(res.statusCode, 200);
+    t.end();
+  });
+});
+
+
 
 test('valid default headers', function(t) {
   server.tester = function(req, res) {
@@ -611,6 +838,8 @@ test('not whitelisted algorithm', function(t) {
     t.end();
   });
 });
+
+
 
 
 test('tearDown', function(t) {
