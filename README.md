@@ -36,7 +36,8 @@ var req = https.request(options, function(res) {
 
 httpSignature.sign(req, {
   key: key,
-  keyId: './cert.pem'
+  keyId: './cert.pem',
+  keyPassphrase: 'secret' // (optional)
 });
 
 req.end();
