@@ -17,6 +17,7 @@ var httpSignature = require('../lib/index');
 var hmacKey = null;
 var httpOptions = null;
 var rsaPrivate = null;
+var rsaPrivateEncrypted = null;
 var dsaPrivate = null;
 var ecdsaPrivate = null;
 var signOptions = null;
@@ -30,9 +31,11 @@ var socket = null;
 
 test('setup', function(t) {
   rsaPrivate = fs.readFileSync(__dirname + '/rsa_private.pem', 'ascii');
+  rsaPrivateEncrypted = fs.readFileSync(__dirname + '/rsa_private_encrypted.pem', 'ascii');
   dsaPrivate = fs.readFileSync(__dirname + '/dsa_private.pem', 'ascii');
   ecdsaPrivate = fs.readFileSync(__dirname + '/ecdsa_private.pem', 'ascii');
   t.ok(rsaPrivate);
+  t.ok(rsaPrivateEncrypted);
   t.ok(dsaPrivate);
   t.ok(ecdsaPrivate);
 
@@ -262,6 +265,27 @@ test('signing opaque param', function(t) {
   req.end();
 });
 
+test('signing with key protected with passphrase', function(t) {
+  var req = http.request(httpOptions, function(res) {
+    t.end();
+  });
+  var opts = {
+    keyId: 'unit',
+    key: rsaPrivateEncrypted,
+    keyPassphrase: '123',
+    headers: ['date', '(algorithm)']
+  };
+
+  req._stringToSign = null;
+  t.ok(httpSignature.sign(req, opts));
+  t.ok(req.getHeader('Authorization'));
+  t.strictEqual(typeof (opts.algorithm), 'string');
+  t.strictEqual(typeof (req._stringToSign), 'string');
+  t.ok(req._stringToSign.match(/^date: [^\n]*\n\(algorithm\): [^\n]*$/));
+  console.log('> ' + req.getHeader('Authorization'));
+  req.end();
+});
+
 test('request-target with dsa key', function(t) {
   var req = http.request(httpOptions, function(res) {
     t.end();
@@ -334,6 +358,25 @@ test('createSigner with RSA key, auto algo', function(t) {
   var s = httpSignature.createSigner({
     keyId: 'foo',
     key: rsaPrivate
+  });
+  s.writeTarget('get', '/');
+  var date = s.writeDateHeader();
+  s.sign(function (err, authz) {
+    t.error(err);
+    var req = http.request(httpOptions, function(res) {
+      t.end();
+    });
+    req.setHeader('date', date);
+    req.setHeader('authorization', authz);
+    req.end();
+  });
+});
+
+test('createSigner with RSA key, auto algo, passphrase', function(t) {
+  var s = httpSignature.createSigner({
+    keyId: 'foo',
+    key: rsaPrivateEncrypted,
+    keyPassphrase: '123'
   });
   s.writeTarget('get', '/');
   var date = s.writeDateHeader();
