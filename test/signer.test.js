@@ -244,6 +244,28 @@ test('signing with unspecified algorithm', function(t) {
   req.end();
 });
 
+test('hide algorithm (unspecified algorithm)', function(t) {
+  var req = http.request(httpOptions, function(res) {
+    t.end();
+  });
+  var opts = {
+    keyId: 'unit',
+    key: rsaPrivate,
+    headers: ['date', '(algorithm)'],
+    hideAlgorithm: true,
+  };
+
+  req._stringToSign = null;
+  t.ok(httpSignature.sign(req, opts));
+  t.ok(req.getHeader('Authorization'));
+  t.strictEqual(typeof (opts.algorithm), 'string');
+  t.strictEqual(opts.algorithm, 'hs2019');
+  t.strictEqual(typeof (req._stringToSign), 'string');
+  t.ok(req._stringToSign.match(/^date: [^\n]*\n\(algorithm\): [^\n]*$/));
+  console.log('> ' + req.getHeader('Authorization'));
+  req.end();
+});
+
 test('signing opaque param', function(t) {
   var req = http.request(httpOptions, function(res) {
     t.end();

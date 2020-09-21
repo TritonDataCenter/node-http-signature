@@ -292,6 +292,123 @@ test('valid ecdsa', function(t) {
 });
 
 
+test('invalid hs2019', function(t) {
+  server.tester = function(req, res) {
+    var parsed = httpSignature.parseRequest(req);
+    t.ok(!httpSignature.verify(parsed, ecdsaPublic));
+
+    res.writeHead(200);
+    res.write(JSON.stringify(parsed, null, 2));
+    res.end();
+  };
+
+  options.headers.Date = jsprim.rfc1123(new Date());
+  options.headers.Authorization =
+      'Signature keyId="foo",algorithm="hs2019",signature="' +
+      uuid() + '"';
+
+  http.get(options, function(res) {
+    t.equal(res.statusCode, 200);
+    t.end();
+  });
+});
+
+test('invalid hs2019 (valid ecdsa-sha256)', function(t) {
+  server.tester = function(req, res) {
+    var parsed = httpSignature.parseRequest(req);
+    t.ok(!httpSignature.verify(parsed, ecdsaPublic));
+
+    res.writeHead(200);
+    res.write(JSON.stringify(parsed, null, 2));
+    res.end();
+  };
+
+  options.headers.Date = jsprim.rfc1123(new Date());
+  var key = sshpk.parsePrivateKey(ecdsaPrivate);
+  var signer = key.createSign('sha256');
+  signer.update('date: ' + options.headers.Date);
+  options.headers.Authorization =
+      'Signature keyId="foo",algorithm="hs2019",signature="' +
+      signer.sign().toString() + '"';
+
+  http.get(options, function(res) {
+    t.equal(res.statusCode, 200);
+    t.end();
+  });
+});
+
+test('valid hs2019 (valid ecdsa-sha512)', function(t) {
+  server.tester = function(req, res) {
+    var parsed = httpSignature.parseRequest(req);
+    t.ok(httpSignature.verify(parsed, ecdsaPublic));
+
+    res.writeHead(200);
+    res.write(JSON.stringify(parsed, null, 2));
+    res.end();
+  };
+
+  options.headers.Date = jsprim.rfc1123(new Date());
+  var key = sshpk.parsePrivateKey(ecdsaPrivate);
+  var signer = key.createSign('sha512');
+  signer.update('date: ' + options.headers.Date);
+  options.headers.Authorization =
+      'Signature keyId="foo",algorithm="hs2019",signature="' +
+      signer.sign().toString() + '"';
+
+  http.get(options, function(res) {
+    t.equal(res.statusCode, 200);
+    t.end();
+  });
+});
+
+test('valid hs2019 (valid dsa-sha512)', function(t) {
+  server.tester = function(req, res) {
+    var parsed = httpSignature.parseRequest(req);
+    t.ok(httpSignature.verify(parsed, dsaPublic));
+
+    res.writeHead(200);
+    res.write(JSON.stringify(parsed, null, 2));
+    res.end();
+  };
+
+  options.headers.Date = jsprim.rfc1123(new Date());
+  var key = sshpk.parsePrivateKey(dsaPrivate);
+  var signer = key.createSign('sha512');
+  signer.update('date: ' + options.headers.Date);
+  options.headers.Authorization =
+      'Signature keyId="foo",algorithm="hs2019",signature="' +
+      signer.sign().toString() + '"';
+
+  http.get(options, function(res) {
+    t.equal(res.statusCode, 200);
+    t.end();
+  });
+});
+
+test('valid hs2019 (valid rsa-sha512)', function(t) {
+  server.tester = function(req, res) {
+    var parsed = httpSignature.parseRequest(req);
+    t.ok(httpSignature.verify(parsed, rsaPublic));
+
+    res.writeHead(200);
+    res.write(JSON.stringify(parsed, null, 2));
+    res.end();
+  };
+
+  options.headers.Date = jsprim.rfc1123(new Date());
+  var signer = crypto.createSign('RSA-SHA512');
+  signer.update('date: ' + options.headers.Date);
+  options.headers.Authorization =
+      'Signature keyId="foo",algorithm="hs2019",signature="' +
+      signer.sign(rsaPrivate, 'base64') + '"';
+
+  http.get(options, function(res) {
+    t.equal(res.statusCode, 200);
+    t.end();
+  });
+});
+
+
 test('invalid date', function(t) {
   server.tester = function(req, res) {
     t.throws(function() {
