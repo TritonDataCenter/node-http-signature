@@ -4,6 +4,11 @@
 
 (nothing yet)
 
+## 1.3.5
+
+ - Add keyPassphrase option to signer (#115)
+ - Add support for created and expires values (#110)
+
 ## 1.3.4
 
 - Fix breakage in v1.3.3 with the setting of the "algorithm" field in the
