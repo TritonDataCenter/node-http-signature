@@ -148,7 +148,7 @@ The authorization header and signature would be generated as:
 The client would compose the signing string as (`+ "\n"` inserted for
 readability):
 
-    (request-target) post /foo + "\n"
+    (request-target): post /foo + "\n"
     date: Tue, 07 Jun 2011 20:51:35 GMT + "\n"
     content-type: application/json + "\n"
     digest: SHA-256=Base64(SHA256(Body))
