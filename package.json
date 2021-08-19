@@ -39,6 +39,6 @@
     "uuid": "^2.0.2"
   },
   "publishConfig": {
-    "registry": "https://npm.pkg.github.com/@fjuul"
+    "registry": "https://npm.pkg.github.com/fjuul"
   }
 }
