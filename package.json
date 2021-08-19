@@ -1,5 +1,5 @@
 {
-  "name": "http-signature",
+  "name": "@fjuul/http-signature",
   "description": "Reference implementation of Joyent's HTTP Signature scheme.",
   "version": "1.3.5",
   "license": "MIT",
@@ -11,10 +11,10 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git://github.com/joyent/node-http-signature.git"
+    "url": "git://github.com/fjuul/node-http-signature.git"
   },
-  "homepage": "https://github.com/joyent/node-http-signature/",
-  "bugs": "https://github.com/joyent/node-http-signature/issues",
+  "homepage": "https://github.com/fjuul/node-http-signature/",
+  "bugs": "https://github.com/fjuul/node-http-signature/issues",
   "keywords": [
     "https",
     "request"
@@ -37,5 +37,8 @@
   "devDependencies": {
     "tap": "0.4.2",
     "uuid": "^2.0.2"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/@fjuul"
   }
 }
