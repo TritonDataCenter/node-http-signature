@@ -31,7 +31,7 @@
   },
   "dependencies": {
     "assert-plus": "^1.0.0",
-    "jsprim": "^1.2.2",
+    "jsprim": "^2.0.1",
     "sshpk": "^1.14.1"
   },
   "devDependencies": {
