@@ -80,7 +80,7 @@ pipeline {
 
     post {
         always {
-            joyMattermostNotification()
+            joySlackNotifications()
         }
     }
 }
