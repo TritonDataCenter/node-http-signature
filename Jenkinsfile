@@ -1,4 +1,4 @@
-@Library('jenkins-joylib@v1.0.2') _
+@Library('jenkins-joylib@v1.0.8') _
 
 pipeline {
 
@@ -80,7 +80,7 @@ pipeline {
 
     post {
         always {
-            joyMattermostNotification()
+            joySlackNotifications()
         }
     }
 }
