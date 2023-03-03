@@ -1,6 +1,6 @@
 [submodule "deps/javascriptlint"]
 	path = deps/javascriptlint
-	url = git@github.com:joyent/javascriptlint
+	url = https://github.com/TritonDataCenter/javascriptlint
 [submodule "deps/jsstyle"]
 	path = deps/jsstyle
-	url = git@github.com:joyent/jsstyle
+	url = https://github.com/TritonDataCenter/jsstyle
