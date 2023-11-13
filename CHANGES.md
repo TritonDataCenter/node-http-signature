@@ -4,6 +4,10 @@
 
 (nothing yet)
 
+## 1.4.0
+
+* Update sshpk for ed25519 support
+
 ## 1.3.6
 
 * Update jsprim due to vulnerability in json-schema (#123)
